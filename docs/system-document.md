@@ -158,7 +158,6 @@ This function allows the Admin to assign qualified lecturers to teach specific o
 * The system shall allow the Admin to view the selected Lecturer's teaching assignments.
 * The system shall display the Course Sections assigned to the Lecturer.
 * The system shall display the Lecturer's teaching schedule.
-
 #### 12.Manage Teaching Course (Lecturer)
 This function allows Lecturers to view the list of courses officially assigned to them by the Admin for a specific semester.
 * The system shall allow the Lecturer to select a Semester and view Courses directly assigned to them by the Admin (Course Code, Course Name, Credit, Prerequisite).  
@@ -167,17 +166,100 @@ This function allows Lecturers to view the list of courses officially assigned t
 * The system shall display an appropriate message if no Courses are assigned for the selected Semester and automatically update the teaching list when assignments change.
 
 #### 13.Manage Student Grades (Lecturer)
-
+* The system shall allow the Lecturer to select a Semester.
+* The system shall allow the Lecturer to view Courses assigned to them by the Admin.
+* The system shall allow the Lecturer to select a Course.
+* The system shall allow the Lecturer to view only Course taught by them.
+* The system shall display:
+  * Course Code.
+  * Course Name.
+* The system shall allow the Lecturer to view Students registered in the selected Course.
+* The system shall display:
+  * Student ID.
+  * Student Name.
+  * Email.
+* The system shall allow the Lecturer to select a Student.
+* The system shall allow the Lecturer to view Student information.
+* The system shall allow the Lecturer to enter or update the Student's Grade.
+* The Lecturer shall enter a Grade.
+* The system shall validate the Grade.
+* The system shall save the Grade if the validation is successful.
+* The system shall display a success or error message after saving the Grade.
+* The system shall ensure that:
+  * The Student is registered in the selected Course.
+  * The Course is assigned to the Lecturer by the Admin.
+  * The Grade is within the valid grading range.
+* The system shall not allow the Lecturer to enter or update Grades for Students in Course taught by another Lecturer.
+* The system shall not allow the Lecturer to enter or update Grades for Courses that were not assigned to them by the Admin.
 #### 14.View Courses (Student)
-
+* The system shall allow the Student to view Courses belonging to their Major.
+* The system shall allow the Student to search for Courses by:
+  * Course Code.
+  * Course Name.
+* The system shall allow the Student to select a Course to view detailed information.
+* The system shall display:
+  * Course Code.
+  * Course Name.
+  * Credit.
+  * Prerequisite.
+  * Recommended Semester.
 #### 15.Course Registration (Student)
-
+* The system shall allow the Student to select a Course to register.
+* The system shall validate the registration before allowing the Student to confirm.
+* The system shall check that:
+  * The Registration Period is open.
+  * The Course belongs to the Student's Major / Curriculum.
+  * The Prerequisite has been satisfied.
+* If any validation fails, the system shall reject the registration and display an appropriate error message.
+* If all validations pass, the system shall allow the Student to confirm the registration.
+* After successful registration, the system shall:
+  * Save the registration.
+  * Display a success message.
 #### 16.View Registration Status (Student)
-
+* The system shall allow the Student to select a Semester.
+* The system shall allow the Student to view their registered Course.
+* The system shall display:
+  * Course Code.
+  * Course Name.
+  * Credit.
+  * Registration Status.
+* The system shall allow the Student to view the Registration Period.
+* The system shall display:
+  * Semester.
+  * Registration Start Date.
+  * Registration End Date.
+  * Current Registration Status.
+* The system shall display whether the Course registration was:
+  * Registered.
+  * Dropped.
 #### 17.Drop Course (Student)
-
+* The system shall allow the Student to view registered Course.
+* The system shall allow the Student to select a registered Course.
+* The system shall display:
+  * Course ID
+  * Courses Name
+* The system shall allow the Student to confirm dropping the Course.
+* The system shall validate that:
+  * The Course was registered by the Student.
+  * The Drop Period is still open.
+* If the validation is successful, the system shall:
+  * Remove the Student's registration.
+  * Update the Registration Status.
+  * Display a success message.
+* If the validation fails, the system shall display an appropriate error message.
 #### 18.DView Grades (Student)
-
+* The system shall allow the Student to select a Semester.
+* The system shall allow the Student to view their Grades.
+* The system shall display:
+  * Course Code.
+  * Course Name.
+  * Credit.
+  * Grade.
+  * Semester.
+  * Result Status (passed / not passed)
+* The system shall automatically calculate grade to check result status.
+* The system shall display an appropriate message when a Grade has not yet been entered.
+* The Student shall only be able to view their own Grades.
 ## II. Non-Functional Requirements
 
 ### Product Requirements
