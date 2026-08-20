@@ -298,7 +298,7 @@ Administrators shall have authority to manage users, majors, courses, semesters,
 
 Unauthorized access attempts shall be rejected by the system.
 
-2. Organizational Requirements
+Organizational Requirements
 
 Operational Requirements
 
