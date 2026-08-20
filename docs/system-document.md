@@ -38,15 +38,11 @@
 * The system shall ensure that only one Admin account exists in the system.
 
 ### Manage Courses
-* The system shall allow the Admin to select a Major and view the Courses belonging to that Major.
-* The system shall allow the Admin to search for Courses.
-* The system shall allow the Admin to add a Course.
-* The system shall allow the Admin to view Course information.
-* The system shall allow the Admin to edit Course information.
-* The system shall allow the Admin to delete a Course.
-* The system shall allow the Admin to set prerequisites for a Course.
-  * The prerequisite shall be an existing Course.
-  * A Course shall not be set as its own prerequisite.
+This function allows the Admin to manage course catalog data and set up prerequisite constraints.
+* The system shall allow the Admin to view and search Courses by Course Code or Course Name.
+* The system shall allow the Admin to create a Course requiring Course Code, Course Name, Credit, and Prerequisite.
+* The system shall allow the Admin to view Course details, edit Course information, delete a Course (requiring confirmation), and set prerequisite courses.
+* The system shall validate constraints: Course Code is unique, Credit value is valid, Prerequisite is an existing Course, and a Course cannot be its own prerequisite.  
 
 ### Manage Semester
 * The system shall allow the Admin to create a Semester.
