@@ -284,6 +284,8 @@ This function allows Lecturers to view the list of courses officially assigned t
 ---
 
 ## III. Data Flow Diagram
+<img width="841" height="594" alt="DFD0 drawio" src="https://github.com/user-attachments/assets/9eb7d022-a324-4e83-a1c5-f6c09d37d7c1" />
+
 
 ## IV. Use case Diagram
 
