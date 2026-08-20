@@ -209,6 +209,20 @@
 * The system shall update the Lecturer's teaching Course list when the Admin creates, changes, or removes a teaching assignment.
 
 ### 11.View Lecturer Teaching Assignment
+* The system shall allow the Admin to select a Major and Course.
+* The system shall allow the Admin to view the Lecturers assigned to the selected Course.
+* The system shall allow the Admin to select a Lecturer.
+* The system shall allow the Admin to view the selected Lecturer's teaching assignments.
+* The system shall display the Course Sections assigned to the Lecturer.
+* The system shall display the Lecturer's teaching schedule.
+#### 12.Manage Teaching Course (Lecturer)
+This function allows Lecturers to view the list of courses officially assigned to them by the Admin for a specific semester.
+* The system shall allow the Lecturer to select a Semester and view Courses directly assigned to them by the Admin (Course Code, Course Name, Credit, Prerequisite).  
+* The system shall allow the Lecturer to view the details of each assigned Course.
+* The system shall prevent Lecturers from independently registering, requesting, self-assigning, or modifying Course assignments.
+* The system shall display an appropriate message if no Courses are assigned for the selected Semester and automatically update the teaching list when assignments change.
+
+#### 13.Manage Student Grades (Lecturer)
 * The system shall allow the Lecturer to select a Semester.
 * The system shall allow the Lecturer to view Courses assigned to them by the Admin.
 * The system shall allow the Lecturer to select a Course.
