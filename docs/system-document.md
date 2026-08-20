@@ -119,37 +119,94 @@
 - The system shall require confirmation before removing a Course.
   
 ### 6.Manage Courses (Admin)
-This function allows the Admin to manage course catalog data and set up prerequisite constraints.
-* The system shall allow the Admin to view and search Courses by Course Code or Course Name.
-* The system shall allow the Admin to create a Course requiring Course Code, Course Name, Credit, and Prerequisite.
-* The system shall allow the Admin to view Course details, edit Course information, delete a Course (requiring confirmation), and set prerequisite courses.
-* The system shall validate constraints: Course Code is unique, Credit value is valid, Prerequisite is an existing Course, and a Course cannot be its own prerequisite.  
+* The system shall allow the Admin to create a Semester.
+* When creating a Semester, the system shall require:
+  * Semester Name
+  * Start Date
+  * End Date
+* The system shall allow the Admin to select a Semester.
+* The system shall allow the Admin to view Semester information, including:
+  * Semester Name
+  * Start Date
+  * End Date
+  * Semester Status
+* The system shall allow the Admin to edit Semester information.
+* The system shall allow the Admin to delete a Semester.
+* The system shall require confirmation before deleting a Semester.
+* The system shall validate that:
+  * The Start Date is earlier than the End Date.
+  * Semesters do not overlap.
+  * Semester dates are valid. 
 
 ### 7.Manage Semester (Admin)
-This function allows the Admin to create and manage academic semesters and their timeframes.
-* The system shall allow the Admin to create a Semester by providing Semester Name, Start Date, and End Date.
-* The system shall allow the Admin to select a Semester to view information (Semester Name, Start Date, End Date, Semester Status), edit information, or delete a Semester (requiring confirmation).
-* The system shall validate that Start Date is earlier than End Date, Semesters do not overlap, and dates are valid.
+* The system shall allow the Admin to select a Semester.
+* The system shall allow the Admin to manage the Course Registration Period.
+* The system shall allow the Admin to set:
+  * Registration Start Date / Time
+  * Registration End Date / Time
+* The system shall allow the Admin to open Registration.
+* The system shall allow the Admin to close Registration.
+* The system shall allow the Admin to view Registration status.
+* The system shall display:
+  * Start Date / Time
+  * End Date / Time
+  * Current Status (Not Started, Open, Closed)
+* The system shall validate that:
+  * Registration Start Date / Time is earlier than Registration End Date / Time.
+  * The Registration Period is within the Semester period.
+  * Another Round 1 is not already active.
 
 ### 8.Manage Registration Period (Admin)
-This function allows the Admin to define, open, close, and monitor course registration timeframes for semesters.
-* The system shall allow the Admin to select a Semester and manage the Course Registration Period.
-* The system shall allow the Admin to set Registration Start Date/Time and Registration End Date/Time.
-* The system shall allow the Admin to Open, Close, and view Registration Status (Not Started, Open, Closed).
-* The system shall validate that Start Date/Time is earlier than End Date/Time, the period is within the Semester duration, and another Round 1 registration is not active.
+* The system shall allow the Admin to select a Semester.
+* The system shall allow the Admin to view Registration Demand.
+* The system shall display:
+  * Course Code
+  * Course Name
+  * Number of Registered Students
+* The system shall allow the Admin to view the Student List for a Course.
+* The Student List shall display:
+  * Student ID.
+  * Student Name.
+  * Email.
+  * Registration Status (registered, unregistered).
+* The system shall allow the Admin to search Courses by:
+  * Course Code
+  * Course Name
+* The system shall allow the Admin to generate a Registration Demand Report.
+* The Registration Demand Report shall include:
+  * Course Code.
+  * Course Name.
+  * Number of Students.
+  * Registration List.
 
 ### 9.Manage Registration Demand (Admin)
-This function allows the Admin to monitor student course registration demands and generate registration summary reports.  
-* The system shall allow the Admin to select a Semester and view Registration Demand (Course Code, Course Name, Number of Registered Students).
-* The system shall allow the Admin to view the Student List for a Course (Student ID, Student Name, Email, Registration Status).
-* The system shall allow the Admin to search Courses by Course Code or Course Name.
-* The system shall allow the Admin to generate a Registration Demand Report containing Course Code, Course Name, Number of Students, and Registration List.
+* The system shall allow the Admin to select a Major.
+* The system shall allow the Admin to select a Course.
+* The system shall display Lecturers who are qualified to teach the selected Course.
+* The system shall allow the Admin to view Lecturer qualifications.
+* The system shall allow the Admin to select a qualified Lecturer.
+* The system shall allow the Admin to assign the selected Lecturer to the Course.
+* The system shall validate that:
+  * The Lecturer is qualified to teach the Course.
+* The system shall display a success message when the assignment is completed successfully.
+* The system shall display an error message if the assignment cannot be completed.
+
 
 ### 10.Assign Lecturer (Admin)
-This function allows the Admin to assign qualified lecturers to teach specific offered courses.
-* The system shall allow the Admin to select a Major, select a Course, and view Lecturers qualified to teach the selected Course.
-* The system shall allow the Admin to view Lecturer qualifications, select a qualified Lecturer, and assign the selected Lecturer to the Course.
-* The system shall validate that the Lecturer is qualified to teach the Course and display appropriate success/error messages.
+* The system shall allow the Lecturer to select a Semester.
+* The system shall allow the Lecturer to view the Courses directly assigned to them by the Admin for the selected Semester.
+* The system shall display:
+  * Course Code
+  * Course Name
+  * Credit
+  * Prerequisite
+* The system shall allow the Lecturer to view the details of each Course assigned by the Admin.
+* The system shall **not** allow the Lecturer to select or register for a Course independently.
+* The system shall **not** allow the Lecturer to request or assign themselves to a Course.
+* The system shall **not** allow the Lecturer to modify the Course assignment made by the Admin.
+* The system shall allow the Lecturer to view their teaching Courses according to the Admin's assignments.
+* The system shall display an appropriate message if no Courses have been assigned to the Lecturer for the selected Semester.
+* The system shall update the Lecturer's teaching Course list when the Admin creates, changes, or removes a teaching assignment.
 
 ### 11.View Lecturer Teaching Assignment
 * The system shall allow the Admin to select a Major and Course.
@@ -166,6 +223,46 @@ This function allows Lecturers to view the list of courses officially assigned t
 * The system shall display an appropriate message if no Courses are assigned for the selected Semester and automatically update the teaching list when assignments change.
 
 #### 13.Manage Student Grades (Lecturer)
+* The system shall allow the Lecturer to select a Semester.
+* The system shall allow the Lecturer to view Courses assigned to them by the Admin.
+* The system shall allow the Lecturer to select a Course.
+* The system shall allow the Lecturer to view only Courses taught by them.
+* The system shall display:
+  * Course Code
+  * Course Name
+* The system shall allow the Lecturer to view Students registered in the selected Course.
+* The system shall display:
+  * Student ID
+  * Student Name
+  * Email
+* The system shall allow the Lecturer to select a Student.
+* The system shall allow the Lecturer to view Student information.
+* The system shall allow the Lecturer to enter or update the Student's Grade:
+* The Lecturer shall enter a Grade.
+* The system shall validate the Grade.
+* The system shall save the Grade if the validation is successful.
+* The system shall display a success or error message after saving the Grade.
+* The system shall ensure that:
+  * The Student is registered in the selected Course.
+  * The Course is assigned to the Lecturer by the Admin.
+  * The Grade is within the valid grading range.
+* The system shall **not** allow the Lecturer to enter or update Grades for Students in Courses taught by another Lecturer.
+* The system shall **not** allow the Lecturer to enter or update Grades for Courses that were not assigned to them by the Admin.
+
+### 12.Manage Teaching Course (Lecturer)
+* The system shall allow the Student to view Courses belonging to their Major.
+* The system shall allow the Student to search for Courses by:
+  * Course Code
+  * Course Name
+* The system shall allow the Student to select a Course to view detailed information.
+* The system shall display:
+  * Course Code
+  * Course Name
+  * Credit
+  * Prerequisite
+  * Recommended Semester
+
+### 13.Manage Student Grades (Lecturer)
 
 * The system shall allow the Lecturer to select a Semester.
 * The system shall allow the Lecturer to view Courses assigned to them by the Admin.
@@ -192,7 +289,7 @@ This function allows Lecturers to view the list of courses officially assigned t
   * The Grade is within the valid grading range.
 * The system shall not allow the Lecturer to enter or update Grades for Students in Course taught by another Lecturer.
 * The system shall not allow the Lecturer to enter or update Grades for Courses that were not assigned to them by the Admin.
-#### 14.View Courses (Student)
+### 14.View Courses (Student)
 * The system shall allow the Student to view Courses belonging to their Major.
 * The system shall allow the Student to search for Courses by:
   * Course Code.
@@ -204,7 +301,7 @@ This function allows Lecturers to view the list of courses officially assigned t
   * Credit.
   * Prerequisite.
   * Recommended Semester.
-#### 15.Course Registration (Student)
+### 15.Course Registration (Student)
 * The system shall allow the Student to select a Course to register.
 * The system shall validate the registration before allowing the Student to confirm.
 * The system shall check that:
@@ -217,7 +314,7 @@ This function allows Lecturers to view the list of courses officially assigned t
   * Save the registration.
   * Display a success message.
 
-#### 16.View Registration Status (Student)
+### 16.View Registration Status (Student)
 * The system shall allow the Student to select a Semester.
 * The system shall allow the Student to view their registered Course.
 * The system shall display:
@@ -235,7 +332,7 @@ This function allows Lecturers to view the list of courses officially assigned t
   * Registered.
   * Dropped.
 
-#### 17.Drop Course (Student)
+### 17.Drop Course (Student)
 * The system shall allow the Student to view registered Course.
 * The system shall allow the Student to select a registered Course.
 * The system shall display:
@@ -251,7 +348,7 @@ This function allows Lecturers to view the list of courses officially assigned t
   * Display a success message.
 * If the validation fails, the system shall display an appropriate error message.
 
-#### 18.DView Grades (Student)
+### 18.DView Grades (Student)
 * The system shall allow the Student to select a Semester.
 * The system shall allow the Student to view their Grades.
 * The system shall display:
@@ -267,11 +364,9 @@ This function allows Lecturers to view the list of courses officially assigned t
 ## II. Non-Functional Requirements
 
 ### Product Requirements
-
 #### Usability Requirements
 
 ###### Usability
-
 * The system shall provide a clear, consistent, and user-friendly interface for Students, Lecturers, and Administrators.
 * Course, prerequisite, recommended-semester, registration-status, and lecturer information shall be presented clearly.
 * Course registration status shall be displayed clearly, including Registered, Dropped, and Failed where applicable.
@@ -279,32 +374,25 @@ This function allows Lecturers to view the list of courses officially assigned t
 * Error messages and notifications shall clearly explain the reason for failed operations.
 
 #### Efficiency Requirements
-
 ###### Performance
-
 * The system shall respond to common user requests such as login, course viewing, course registration, course dropping, teaching-course viewing, grade entry, grade updating, and grade viewing within 3 seconds under normal operating conditions.
 * The system shall remain responsive during peak course-registration periods.
 
 ###### Scalability
-
 * The system shall support an increasing number of students, lecturers, majors, courses, semesters, registration records, teaching assignments, and grade records.
 * The system architecture shall support future functional expansion without requiring a complete redesign of the core system.
 
 #### Dependability Requirements
-
 ###### Availability
-
 * The system shall be available during normal academic operations and throughout active registration periods, except during scheduled maintenance.
 * Scheduled maintenance should be performed outside active registration periods whenever possible.
 
 ###### Reliability
-
 * The system shall ensure correct and reliable processing of course registration, course dropping, lecturer assignment, grade entry, and grade updates.
 * If a transaction fails, incomplete changes shall be rolled back so that no partial or invalid data remains.
 * The system shall prevent duplicate registration of the same course by the same student.
 
 ###### Data Integrity
-
 * The system shall maintain valid relationships among Major, Student, Course, Lecturer, Teaching Qualification, Registration, Teaching Assignment, and Grade data.
 * A student shall only register for courses belonging to the student's assigned major.
 * A registered course shall reference an existing course.
@@ -317,7 +405,6 @@ This function allows Lecturers to view the list of courses officially assigned t
 * Deleting or updating records shall not create orphaned or inconsistent data.
 
 ###### Concurrency
-
 * The system shall correctly handle simultaneous registration requests from multiple students.
 * The system shall prevent duplicate registration records when multiple registration requests are processed concurrently.
 * The system shall keep course registration data consistent after concurrent operations.
@@ -325,14 +412,12 @@ This function allows Lecturers to view the list of courses officially assigned t
 * The system shall correctly process concurrent registration requests without lost transactions or data inconsistency.
 
 ###### Backup and Recovery
-
 * The system shall support scheduled backup of important user, course, registration, teaching-assignment, and grade data.
 * The system shall provide a recovery mechanism for restoring valid data after a critical failure.
 * The system shall support restoration of normal operation after an unexpected failure.
 * Recovered data shall not contain duplicate, partial, or inconsistent registration records.
 
 #### Security Requirements
-
 ###### Authentication
 
 * The system shall require users to authenticate using a valid username and password before accessing protected functions.
@@ -341,7 +426,6 @@ This function allows Lecturers to view the list of courses officially assigned t
 * The system shall allow authenticated users to change their password after verifying the current password.
 
 ###### Authorization
-
 * The system shall enforce role-based access control for Student, Lecturer, and Administrator accounts.
 * Students shall only access student functions such as viewing courses, registering courses, dropping registered courses, viewing registration status, and viewing their own grades.
 * Lecturers shall only access Courses assigned to them by an Administrator.
@@ -351,26 +435,28 @@ This function allows Lecturers to view the list of courses officially assigned t
 * Unauthorized access attempts shall be rejected by the system.
 
 ### 2. Organizational Requirements
-
 #### Operational Requirements
 
 ###### Maintenance
-
 * The system shall be designed to support easy maintenance and updates.
 * Major functions such as user management, course management, semester management, registration, teaching assignment, and grade management should be separated into manageable modules.
 * Maintenance and software updates shall preserve existing user, academic, registration, teaching-assignment, and grade data.
 
 #### Development Requirements
-
 ###### Design Constraints
-
 * The Course Registration System shall be implemented using Python and a relational database management system.
 * The system shall use PostgreSQL as the relational database management system.
 * The system shall use DBeaver to connect to and manage the PostgreSQL database.
 ---
 
 ## III. Data Flow Diagram
+*Level 0:
+
 <img width="841" height="594" alt="DFD0 drawio" src="https://github.com/user-attachments/assets/9eb7d022-a324-4e83-a1c5-f6c09d37d7c1" />
+
+*Level 1:
+<img width="2479" height="2312" alt="DFD_Level1" src="https://github.com/user-attachments/assets/f419eda5-97b2-4aee-b905-31be16310a7b" />
+
 
 
 ## IV. Use case Diagram
