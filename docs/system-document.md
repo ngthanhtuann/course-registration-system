@@ -32,7 +32,7 @@
 - The system shall allow Admin, Lecturer, and Student to log out of the system.
   
 ### Manage user
-# Manage Student
+#### Manage Student
 - The system shall allow the Admin to view Students.
 - The system shall display:
   - Student ID.
@@ -63,7 +63,7 @@
 - The system shall allow the Admin to delete or deactivate a Student.
 - The system shall require confirmation before deleting or deactivating a Student.
 - The system shall allow the Admin to view detailed Student information.
-# Manage Lecturer
+#### Manage Lecturer
 - The system shall allow the Admin to view Lecturers.
 - The system shall display:
   - Lecturer ID.
