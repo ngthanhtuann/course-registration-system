@@ -3,17 +3,121 @@
 ## I. Functional Requirements
 
 ### Login (User Authentication)
+- The system shall allow Admin, Lecturer, and Student to log in using valid account credentials.
+- The system shall require users to enter:
+  - Username.
+  - Password.
+- The system shall verify:
+  - Whether the username exists.
+  - Whether the password is correct.
+  - Whether the account is active.
+- If the credentials are valid, the system shall grant access according to the user's role:
+  - Admin.
+  - Lecturer.
+  - Student.
+- If the credentials are invalid, the system shall display an appropriate error message and request re-entry.
 
 ### Manage Account
-
+- The system shall allow Admin, Lecturer, and Student to view account information.
+- The system shall display the following account information according to the user's role:
+  - Admin: username, full name, email, and role.
+  - Lecturer: lecturer ID, username, full name, email and role.
+  - Student: student ID, username, full name, email, major, and role.
+- The system shall allow Admin, Lecturer, and Student to change their password.
+- The user shall enter the current password.
+- The user shall enter the new password.
+- The user shall confirm the new password.
+- The system shall validate the entered password information.
+- The system shall display a success or error message after the password change.
+- The system shall allow Admin, Lecturer, and Student to log out of the system.
+  
+### Manage user
 ### Manage Student
-
+- The system shall allow the Admin to view Students.
+- The system shall display:
+  - Student ID.
+  - Student Name.
+  - Date of Birth.
+  - Email.
+  - Major.
+  - Account Status.
+- The system shall allow the Admin to search Students by:
+  - Student ID.
+  - Student Name.
+  - Major.
+- The system shall allow the Admin to create a Student.
+- When creating a Student, the system shall require:
+  - Student ID.
+  - Full Name.
+  - Date of Birth.
+  - Email.
+  - Major.
+- The system shall validate that the Student ID is unique.
+- The system shall validate that the Email is valid.
+- The system shall allow the Admin to edit Student information.
+- The system shall allow the Admin to change:
+  - Full Name.
+  - Date of Birth.
+  - Email.
+  - Major.
+- The system shall allow the Admin to delete or deactivate a Student.
+- The system shall require confirmation before deleting or deactivating a Student.
+- The system shall allow the Admin to view detailed Student information.
 ### Manage Lecturer
+- The system shall allow the Admin to view Lecturers.
+- The system shall display:
+  - Lecturer ID.
+  - Lecturer Name.
+  - Email.
+  - Qualification for teaching.
+  - Account Status.
+- The system shall allow the Admin to search Lecturers by:
+  - Lecturer ID.
+  - Lecturer Name.
+- The system shall allow the Admin to create a Lecturer.
+- When creating a Lecturer, the system shall require:
+  - Lecturer ID.
+  - Full Name.
+  - Email.
+  - Qualified Courses.
+- The system shall validate that the Lecturer ID is unique.
+- The system shall validate that the Email is valid.
+- The system shall allow the Admin to edit Lecturer information.
+- The system shall allow the Admin to delete or deactivate a Lecturer.
+- The system shall allow the Admin to set the teaching qualifications of a Lecturer.
+- The system shall allow the Admin to view detailed Lecturer information.
+- The system shall ensure that only one Admin account exists in the system.
 
 ### Manage Major
+- The system shall allow the Admin to view Majors.
+- The system shall display:
+  - Major Code.
+  - Major Name.
+- The system shall allow the Admin to create a Major.
+- When creating a Major, the system shall require:
+  - Major Code.
+  - Major Name.
+- The system shall validate that the Major Code is unique.
+- The system shall allow the Admin to edit Major information.
+- The system shall allow the Admin to delete a Major.
+- The system shall check whether the Major is being used before deletion.
+- The system shall allow the Admin to view Major information.
 
 ### Manage Curriculum
-
+- The system shall allow the Admin to select a Major.
+- The system shall allow the Admin to view Courses belonging to the selected Major.
+- The system shall display:
+  - Course Code.
+  - Course Name.
+  - Credit.
+  - Recommended Semester.
+- The system shall allow the Admin to add a Course to the selected Major's Curriculum.
+- When adding a Course, the system shall allow the Admin to:
+  - Select a Course.
+  - Set the Recommended Semester.
+- The system shall allow the Admin to remove a Course from the Curriculum.
+- The system shall require confirmation before removing a Course.
+  
 ### Manage Courses (Admin)
 This function allows the Admin to manage course catalog data and set up prerequisite constraints.
 * The system shall allow the Admin to view and search Courses by Course Code or Course Name.
