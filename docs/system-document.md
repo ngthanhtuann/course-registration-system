@@ -166,6 +166,7 @@ This function allows Lecturers to view the list of courses officially assigned t
 * The system shall display an appropriate message if no Courses are assigned for the selected Semester and automatically update the teaching list when assignments change.
 
 #### 13.Manage Student Grades (Lecturer)
+
 * The system shall allow the Lecturer to select a Semester.
 * The system shall allow the Lecturer to view Courses assigned to them by the Admin.
 * The system shall allow the Lecturer to select a Course.
@@ -215,6 +216,7 @@ This function allows Lecturers to view the list of courses officially assigned t
 * After successful registration, the system shall:
   * Save the registration.
   * Display a success message.
+
 #### 16.View Registration Status (Student)
 * The system shall allow the Student to select a Semester.
 * The system shall allow the Student to view their registered Course.
@@ -232,6 +234,7 @@ This function allows Lecturers to view the list of courses officially assigned t
 * The system shall display whether the Course registration was:
   * Registered.
   * Dropped.
+
 #### 17.Drop Course (Student)
 * The system shall allow the Student to view registered Course.
 * The system shall allow the Student to select a registered Course.
@@ -247,6 +250,7 @@ This function allows Lecturers to view the list of courses officially assigned t
   * Update the Registration Status.
   * Display a success message.
 * If the validation fails, the system shall display an appropriate error message.
+
 #### 18.DView Grades (Student)
 * The system shall allow the Student to select a Semester.
 * The system shall allow the Student to view their Grades.
@@ -366,6 +370,8 @@ This function allows Lecturers to view the list of courses officially assigned t
 ---
 
 ## III. Data Flow Diagram
+<img width="841" height="594" alt="DFD0 drawio" src="https://github.com/user-attachments/assets/9eb7d022-a324-4e83-a1c5-f6c09d37d7c1" />
+
 
 ## IV. Use case Diagram
 
