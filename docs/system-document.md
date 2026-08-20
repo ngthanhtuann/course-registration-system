@@ -185,85 +185,140 @@ This function allows Lecturers to view the list of courses officially assigned t
 #### Usability Requirements
 
 ##### Usability
-* The system shall automatically adjust the interface layout according to the user's screen size.
-* The system shall provide a clear, consistent, and user-friendly interface for Students, Lecturers, and Administrators.
-* Course, course-section, room, schedule, capacity, and lecturer information shall be presented clearly.
-* Course-section status shall be displayed clearly, including Available, Full, and Not Available where applicable.
-* Lecturer-assignment status shall clearly indicate whether a course section is Assigned or Unassigned.
-* Error messages and notifications shall clearly explain the reason for failed operations.
 
-#### Efficiency Requirements
+The system shall provide a clear, consistent, and user-friendly interface for Students, Lecturers, and Administrators.
 
-##### Performance
-* The system shall respond to common user requests such as login, course viewing, course-section viewing, registration, course dropping, and teaching-schedule viewing within 3 seconds under normal operating conditions.
-* The system shall remain responsive during peak course-registration periods.
+Course, prerequisite, recommended-semester, registration-status, and lecturer information shall be presented clearly.
 
-##### Scalability
-* The system shall support an increasing number of students, lecturers, majors, courses, course sections, semesters, and registration records.
+Course registration status shall be displayed clearly, including Registered, Dropped, and Failed where applicable.
 
-#### Dependability Requirements
+Lecturer-assignment status shall clearly indicate whether a course is Assigned or Unassigned.
 
-##### Availability
-* The system shall be available during normal academic operations and throughout active registration periods, except during scheduled maintenance.
-* Scheduled maintenance should be performed outside active registration periods whenever possible.
+Error messages and notifications shall clearly explain the reason for failed operations.
 
-##### Reliability
-* The system shall ensure correct and reliable processing of course-section registration, course dropping, lecturer assignment, and course-section selection.
-* If a transaction fails, incomplete changes shall be rolled back so that no partial or invalid data remains.
-* The system shall prevent duplicate registration of the same course section by the same student.
+Efficiency Requirements
 
-##### Data Integrity
-* The system shall maintain valid relationships among Major, Student, Course, Course Section, Lecturer, Teaching Qualification, Registration, and Teaching Assignment data.
-* A student shall only register for courses belonging to the student's assigned major.
-* A course section shall belong to an existing course.
-* A lecturer assignment shall reference an existing lecturer and a valid course.
-* A course section shall not be assigned to more than one lecturer at the same time.
-* Deleting or updating records shall not create orphaned or inconsistent data.
+Performance
 
-##### Concurrency
-* The system shall correctly handle simultaneous registration requests from multiple students.
-* When only one seat remains in a course section, the system shall allow at most one student to successfully register for that seat.
-* The system shall keep course-section capacity and enrollment data consistent after concurrent operations.
-* Course-section registration transactions shall be processed atomically to prevent the section capacity from being exceeded.
-* The system shall process concurrent registration requests without lost transactions, data inconsistency, or over-enrolment.
+The system shall respond to common user requests such as login, course viewing, course registration, course dropping, teaching-course viewing, grade entry, grade updating, and grade viewing within 3 seconds under normal operating conditions.
 
-##### Backup and Recovery
-* The system shall support scheduled backup of important user, course, course-section, registration, and teaching-assignment data.
-* The system shall provide a recovery mechanism for restoring valid data after a critical failure.
-* The system shall support restoration of normal operation after an unexpected failure.
-* Recovered data shall not contain duplicate, partial, or inconsistent registration records.
+The system shall remain responsive during peak course-registration periods.
 
-#### Security Requirements
+Scalability
 
-##### Authentication
-* The system shall require users to authenticate using a valid username and password before accessing protected functions.
-* User passwords shall not be stored as plain text and shall be protected using a secure password-storage mechanism.
-* After 5 consecutive failed login attempts for the same account, the system shall temporarily block further login attempts for 15 minutes.
-* The system shall allow authenticated users to change their password after verifying the current password.
+The system shall support an increasing number of students, lecturers, majors, courses, semesters, registration records, teaching assignments, and grade records.
 
-##### Authorization
-* The system shall enforce role-based access control for Student, Lecturer, and Administrator accounts.
-* Students shall only access student functions such as viewing courses, viewing course sections, registering, dropping, and viewing registered courses.
-* Lecturers shall only select course sections belonging to courses that have been assigned to them by an Administrator.
-* Administrators shall have authority to manage users, majors, courses, semesters, course sections, registration information, teaching qualifications, and lecturer assignments.
-* The system will reject unauthorized access attempts.
+The system architecture shall support future functional expansion without requiring a complete redesign of the core system.
 
-### Organizational requirements
+Dependability Requirements
 
-#### Operational Requirements
+Availability
 
-##### Maintenance
-* The system shall be designed to support easy maintenance and updates.
-* Major functions such as user management, course management, semester management, course-section management, registration, and teaching assignment should be separated into manageable modules.
-* Maintenance and software updates shall preserve existing user, academic, and registration data.
+The system shall be available during normal academic operations and throughout active registration periods, except during scheduled maintenance.
 
-#### Development Requirements
+Scheduled maintenance should be performed outside active registration periods whenever possible.
 
-##### Design Constraints
-* The Course Registration System shall be implemented using Python as the primary programming language.
-* The system shall use PostgreSQL as the relational database management system.
-* The system shall use DBeaver to connect to and manage the PostgreSQL database.
+Reliability
 
+The system shall ensure correct and reliable processing of course registration, course dropping, lecturer assignment, grade entry, and grade updates.
+
+If a transaction fails, incomplete changes shall be rolled back so that no partial or invalid data remains.
+
+The system shall prevent duplicate registration of the same course by the same student.
+
+Data Integrity
+
+The system shall maintain valid relationships among Major, Student, Course, Lecturer, Teaching Qualification, Registration, Teaching Assignment, and Grade data.
+
+A student shall only register for courses belonging to the student's assigned major.
+
+A registered course shall reference an existing course.
+
+A lecturer assignment shall reference an existing lecturer and a valid course.
+
+A teaching assignment shall reference a valid Course and Lecturer.
+
+A Grade shall reference an existing Student and Course.
+
+A Lecturer shall only enter or update Grades for Students registered in Courses assigned to that Lecturer.
+
+A Student shall only view their own Grades.
+
+Grade data shall remain associated with the correct Student, Course, Lecturer, and Semester.
+
+Deleting or updating records shall not create orphaned or inconsistent data.
+
+Concurrency
+
+The system shall correctly handle simultaneous registration requests from multiple students.
+
+The system shall prevent duplicate registration records when multiple registration requests are processed concurrently.
+
+The system shall keep course registration data consistent after concurrent operations.
+
+Course registration transactions shall be processed atomically to prevent partial or duplicate registration records.
+
+The system shall correctly process concurrent registration requests without lost transactions or data inconsistency.
+
+Backup and Recovery
+
+The system shall support scheduled backup of important user, course, registration, teaching-assignment, and grade data.
+
+The system shall provide a recovery mechanism for restoring valid data after a critical failure.
+
+The system shall support restoration of normal operation after an unexpected failure.
+
+Recovered data shall not contain duplicate, partial, or inconsistent registration records.
+
+Security Requirements
+
+Authentication
+
+The system shall require users to authenticate using a valid username and password before accessing protected functions.
+
+User passwords shall not be stored as plain text and shall be protected using a secure password-storage mechanism.
+
+After 5 consecutive failed login attempts for the same account, the system shall temporarily block further login attempts for 15 minutes.
+
+The system shall allow authenticated users to change their password after verifying the current password.
+
+Authorization
+
+The system shall enforce role-based access control for Student, Lecturer, and Administrator accounts.
+
+Students shall only access student functions such as viewing courses, registering courses, dropping registered courses, viewing registration status, and viewing their own grades.
+
+Lecturers shall only access Courses assigned to them by an Administrator.
+
+Lecturers shall only view Students and enter or update Grades for Courses assigned to them.
+
+Students shall only view their own Grades.
+
+Administrators shall have authority to manage users, majors, courses, semesters, registration periods, registration information, teaching qualifications, and lecturer assignments.
+
+Unauthorized access attempts shall be rejected by the system.
+
+2. Organizational Requirements
+
+Operational Requirements
+
+Maintenance
+
+The system shall be designed to support easy maintenance and updates.
+
+Major functions such as user management, course management, semester management, registration, teaching assignment, and grade management should be separated into manageable modules.
+
+Maintenance and software updates shall preserve existing user, academic, registration, teaching-assignment, and grade data.
+
+Development Requirements
+
+Design Constraints
+
+The Course Registration System shall be implemented using Python and a relational database management system.
+
+The system shall use PostgreSQL as the relational database management system.
+
+The system shall use DBeaver to connect to and manage the PostgreSQL database.
 ---
 
 ## III. Data Flow Diagram
