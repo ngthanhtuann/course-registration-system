@@ -421,7 +421,8 @@ including:
 <img width="841" height="594" alt="DFD0 drawio" src="https://github.com/user-attachments/assets/9eb7d022-a324-4e83-a1c5-f6c09d37d7c1" />
 
 *Level 1:
-<img width="2479" height="2312" alt="DFD_Level1" src="https://github.com/user-attachments/assets/f419eda5-97b2-4aee-b905-31be16310a7b" />
+<img width="2479" height="2253" alt="qaqaqaq drawio" src="https://github.com/user-attachments/assets/bb9fac43-8e25-4ee3-bb5d-e87d02260270" />
+
 
 
 
