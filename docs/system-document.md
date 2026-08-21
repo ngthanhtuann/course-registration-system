@@ -424,6 +424,10 @@ including:
 *Level 1:
 <img width="2479" height="2253" alt="qaqaqaq drawio" src="https://github.com/user-attachments/assets/bb9fac43-8e25-4ee3-bb5d-e87d02260270" />
 
+*Level 2:
+<img width="867" height="582" alt="DFD2" src="https://github.com/user-attachments/assets/f5b5195d-8797-47b2-9b98-2c3ca68b14cf" />
+:
+
 
 
 
