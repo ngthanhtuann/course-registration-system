@@ -170,21 +170,22 @@ including:
 
 ### 8. Manage Registration Period (Admin)
 * The system shall allow the Admin to select a Semester.
-* The system shall allow the Admin to manage the Course Registration Period.
-* The system shall allow the Admin to set:
-  * Registration Start Date / Time
-  * Registration End Date / Time
-* The system shall allow the Admin to open Registration.
-* The system shall allow the Admin to close Registration.
-* The system shall allow the Admin to view Registration status.
-* The system shall display:
-  * Start Date / Time
-  * End Date / Time
-  * Current Status (Not Started, Open, Closed)
-* The system shall validate that:
-  * Registration Start Date / Time is earlier than Registration End Date / Time.
-  * The Registration Period is within the Semester period.
-  * Another Round 1 is not already active.
+* The system shall allow the Admin to set the Registration Period by specifying:
+  * Registration Period's name.
+  * Start Date
+  * End Date
+* The system shall validate the entered Registration Period:
+  * Start Date and End Date must not be empty.
+  * Start Date must be earlier than End Date.
+* The system shall automatically manage and update the Registration Status based on the current system date:
+  * Upcoming: Current date is before Start Date.
+  * Open: Current date is between Start Date and End Date.
+  * Closed: Current date is after End Date.
+* The system shall display the Registration Period information:
+  * Registration Period's name.
+  * Start Date.
+  * End Date.
+  * Current Registration Status (Upcoming, Open, Closed).
 
 ### 9. Manage Registration Demand (Admin)
 * The system shall allow the Admin to select a Semester.
