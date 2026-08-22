@@ -437,9 +437,9 @@ including:
 ### 1.2. List of Use-cases
 | STT | Use Case | Meaning |
 | :--- | :--- | :--- |
-| 1 | Login | Allows the Student, Lecturer, Admin to log in, view personal account information, change password, and log out. |
+| 1 | Login | Allows the Student, Lecturer, Admin to log in to the system using valid account credentials and access functions according to their role. |
 | 2 | Manage Account | Allows the Student, Lecturer, Admin to log in, view personal account information, change password, and log out. |
-| 3 | View Course | Allows the Student to view and search for courses belonging to their assigned major. |
+| 3 | View Course | Allows the Student to view and search for courses belonging to their major. |
 | 4 | Register Course | Allows the Student to select and register for courses during an open registration period. |
 | 5 | Drop Course | Allows the Student to drop a successfully registered course while the drop period is open. |
 | 6 | View Registration Status | Allows the Student to view registered/dropped courses and registration period details for a semester. |
@@ -447,7 +447,7 @@ including:
 | 8 | Manage Teaching Course | Allows the Lecturer to view courses assigned by the Admin for a selected semester. |
 | 9 | Manage Student Grades | Allows the Lecturer to view registered students and enter or update grades for courses assigned to them. |
 | 10 | Manage User | Allows the Admin to create, view, search, edit, and deactivate Student/Lecturer accounts. |
-| 11 | Manage Major | Allows the Admin to create, view, edit, and delete academic majors. |
+| 11 | Manage Major | Allows the Admin to create, view, edit, and delete majors. |
 | 12 | Manage Curriculum | Allows the Admin to add or remove courses from a selected major's curriculum. |
 | 13 | Manage Course | Allows the Admin to create, view, search, edit, and delete courses. |
 | 14 | Manage Semester | Allows the Admin to create, view, edit, and delete academic semesters. |
