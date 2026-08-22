@@ -216,18 +216,16 @@ including:
 
 ### 11. Manage Teaching Course (Lecturer)
 * The system shall allow the Lecturer to select a Semester.
-* The system shall allow the Lecturer to view the Courses directly assigned to them by the Admin for the selected Semester.
+* The system shall allow the Lecturer to view the Courses information directly assigned to them by the Admin for the selected Semester.
 * The system shall display:
   * Course Code
   * Course Name
   * Credit
   * Prerequisite
-* The system shall allow the Lecturer to view the details of each Course assigned by the Admin.
 * The system shall **not** allow the Lecturer to select or register for a Course independently.
 * The system shall **not** allow the Lecturer to request or assign themselves to a Course.
 * The system shall **not** allow the Lecturer to modify the Course assignment made by the Admin.
 * The system shall allow the Lecturer to view their teaching Courses according to the Admin's assignments.
-* The system shall display an appropriate message if no Courses have been assigned to the Lecturer for the selected Semester.
 * The system shall update the Lecturer's teaching Course list when the Admin creates, changes, or removes a teaching assignment.
 ### 12. Manage Student Grades (Lecturer)
 
