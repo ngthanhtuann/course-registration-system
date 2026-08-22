@@ -188,19 +188,19 @@ including:
   * Current Registration Status (Upcoming, Open, Closed).
 
 ### 9. Manage Registration Demand (Admin)
-* The system shall allow the Admin to select a Semester.
-* The system shall allow the Admin to view Registration Demand.
-* The system shall display:
-  * Course Code
-  * Course Name
-  * Number of Registered Students
-* The system shall allow the Admin to view the Student List for a Course.
-  * The Student List shall display: Student ID, Student Name, Email, Registration Status (registered, unregistered).
-* The system shall allow the Admin to search Courses by:
-  * Course Code
-  * Course Name
+* The system shall allow the Admin to select a Registration Period.
+* The system shall display a list of Majors for the selected Registration Period.
+* The system shall allow the Admin to select a Major to view its Course List.
+* The Course List shall display:
+  * Course Code.
+  * Course Name.
+  * Number of Registered Students.
 * The system shall allow the Admin to generate a Registration Demand Report.
-  * The Registration Demand Report shall include: Course Code, Course Name, Number of Students, Registration List.
+* The Registration Demand Report shall include:
+* Course Code.
+* Course Name.
+* Number of Students.
+* Registered student list.
 
 ### 10. Assign Lecturer (Admin)
 * The system shall allow the Admin to select a Major.
