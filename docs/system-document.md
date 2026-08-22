@@ -416,13 +416,13 @@ including:
 ---
 
 ## III. Data Flow Diagram
-*Level 0:
+### Level 0:
 <img width="1132" height="542" alt="Untitled Diagram" src="https://github.com/user-attachments/assets/7564516e-08c7-4f20-bb80-57619e83c80d" />
 
-*Level 1:
+### Level 1:
 <img width="2479" height="2253" alt="qaqaqaq drawio" src="https://github.com/user-attachments/assets/bb9fac43-8e25-4ee3-bb5d-e87d02260270" />
 
-*Level 2:
+### Level 2:
 <img width="867" height="582" alt="DFD" src="https://github.com/user-attachments/assets/541e1abe-b35c-4071-9aa5-026cf348835c" />
 
 ## IV. Use case Diagram
