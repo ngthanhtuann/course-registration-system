@@ -110,6 +110,7 @@
   - Course Code.
   - Course Name.
   - Credit.
+  - Prerequisite
   - Recommended Semester.
 - The system shall allow the Admin to add a Course to the selected Major's Curriculum.
 - When adding a Course, the system shall allow the Admin to:
