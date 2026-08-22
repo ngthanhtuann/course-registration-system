@@ -417,23 +417,44 @@ including:
 
 ## III. Data Flow Diagram
 *Level 0:
-
 <img width="1132" height="542" alt="Untitled Diagram" src="https://github.com/user-attachments/assets/7564516e-08c7-4f20-bb80-57619e83c80d" />
-
 
 *Level 1:
 <img width="2479" height="2253" alt="qaqaqaq drawio" src="https://github.com/user-attachments/assets/bb9fac43-8e25-4ee3-bb5d-e87d02260270" />
 
-
 *Level 2:
-
 <img width="867" height="582" alt="DFD" src="https://github.com/user-attachments/assets/541e1abe-b35c-4071-9aa5-026cf348835c" />
 
-
-
-
 ## IV. Use case Diagram
+### 1. Overview Diagram
 
+### 1.1. List of Actor
+| STT | Actor | Meaning |
+| :--- | :--- | :--- |
+| 1 | Student | Users who register, search and manage their courses in the system. |
+| 2 | Lecturer | Users who teach courses and view teaching-related information. |
+| 3 | Administrator | System administrators who manage courses, lecturers, and registration policies. |
+### 1.2. List of Use-cases
+| STT | Use Case | Meaning |
+| :--- | :--- | :--- |
+| 1 | Login | Allows the Student, Lecturer, Admin to log in, view personal account information, change password, and log out. |
+| 2 | Manage Account | Allows the Student, Lecturer, Admin to log in, view personal account information, change password, and log out. |
+| 3 | View Course | Allows the Student to view and search for courses belonging to their assigned major. |
+| 4 | Register Course | Allows the Student to select and register for courses during an open registration period. |
+| 5 | Drop Course | Allows the Student to drop a successfully registered course while the drop period is open. |
+| 6 | View Registration Status | Allows the Student to view registered/dropped courses and registration period details for a semester. |
+| 7 | View Grades | Allows the Student to view their own grades and pass/fail status for each semester. |
+| 8 | Manage Teaching Course | Allows the Lecturer to view courses assigned by the Admin for a selected semester. |
+| 9 | Manage Student Grades | Allows the Lecturer to view registered students and enter or update grades for courses assigned to them. |
+| 10 | Manage User | Allows the Admin to create, view, search, edit, and deactivate Student/Lecturer accounts. |
+| 11 | Manage Major | Allows the Admin to create, view, edit, and delete academic majors. |
+| 12 | Manage Curriculum | Allows the Admin to add or remove courses from a selected major's curriculum. |
+| 13 | Manage Course | Allows the Admin to create, view, search, edit, and delete courses. |
+| 14 | Manage Semester | Allows the Admin to create, view, edit, and delete academic semesters. |
+| 15 | Manage Registration Period | Allows the Admin to set, open, and close the course registration period for a semester. |
+| 16 | Manage Registration Demand | Allows the Admin to view registration demand, student lists, and generate reports. |
+| 17 | Assign Lecturer | Allows the Admin to assign qualified lecturers to courses. |
+### 2. Use-case:
 ## V. Class Diagram
 
 ## VI. Data Model
