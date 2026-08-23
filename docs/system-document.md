@@ -457,957 +457,756 @@ including:
 | 17 | Assign Lecturer | Allows the Admin to assign qualified lecturers to courses. |
 
 
-2. Use Case: Login
+**2. Use Case: Login**
 
-2.1 Summary
+**2.1 Summary**
 
 This use case allows Admin, Lecturer, and Student to log in to the Course Registration System using valid account credentials and access functions according to their role.
 
-2.2 Flow of Events
+**2.2 Flow of Events**
 
-2.2.1 Main Flow
+**2.2.1 Main Flow**
 
-The user selects the Login function.
+1. The user selects the Login function.
+2. The system requests the username and password.
+3. The user enters the username and password.
+4. The system verifies whether the username exists.
+5. The system verifies whether the password is correct.
+6. The system verifies whether the account is active.
+7. If all credentials are valid, the system authenticates the user and determines access permissions based on the role.
+8. The system grants access to the functions available for that role.
 
-The system requests the username and password.
+**2.2.2 Alternative Flows**
 
-The user enters the username and password.
+A1. Invalid Username: If the username does not exist, the system displays an appropriate error message and requests reentry.<br>
+A2. Incorrect Password: If the password is incorrect, the system displays an appropriate error message and requests reentry.<br>
+A3. Inactive Account: If the account is not active, the system does not grant access.<br>
+A4. Too Many Failed Login Attempts: After 5 consecutive failed login attempts for the same account, the system temporarily blocks further login attempts for 15 minutes.<br>
 
-The system verifies whether the username exists.
+**2.3 Special Requirements**
 
-The system verifies whether the password is correct.
+The system shall respond to login requests within 3 seconds under normal operating conditions.<br>
+Passwords shall not be stored as plain text and shall use a secure password-storage mechanism.<br>
+The system shall enforce role-based access control.<br>
 
-The system verifies whether the account is active.
+**2.4 Preconditions**
 
-If all credentials are valid, the system authenticates the user and determines access permissions based on the role.
+The user has a valid account in the system.<br>
+The account is active.<br>
+The user is not currently logged in.<br>
 
-The system grants access to the functions available for that role.
+**2.5 Postconditions**
 
-2.2.2 Alternative Flows
+Success: The user is authenticated and granted access according to the assigned role.<br>
+Failure: Access is not granted and an appropriate error message is displayed.<br>
 
-A1. Invalid Username: If the username does not exist, the system displays an appropriate error message and requests reentry.
+**2.6 Extension Points**
 
-A2. Incorrect Password: If the password is incorrect, the system displays an appropriate error message and requests reentry.
+None specified in the FR.<br>
 
-A3. Inactive Account: If the account is not active, the system does not grant access.
+**3. Use Case: Manage Account**
 
-A4. Too Many Failed Login Attempts: After 5 consecutive failed login attempts for the same account, the system temporarily blocks further login attempts for 15 minutes.
-
-2.3 Special Requirements
-
-The system shall respond to login requests within 3 seconds under normal operating conditions.
-
-Passwords shall not be stored as plain text and shall use a secure password-storage mechanism.
-
-The system shall enforce role-based access control.
-
-2.4 Preconditions
-
-The user has a valid account in the system.
-
-The account is active.
-
-The user is not currently logged in.
-
-2.5 Postconditions
-
-Success: The user is authenticated and granted access according to the assigned role.
-
-Failure: Access is not granted and an appropriate error message is displayed.
-
-2.6 Extension Points
-
-None specified in the FR.
-
-3. Use Case: Manage Account
-
-3.1 Summary
+**3.1 Summary**
 
 This use case allows an authenticated Admin, Lecturer, or Student to view their account information, change their password, and log out. The displayed information varies by role.
 
-3.2 Flow of Events
+**3.2 Flow of Events**
 
-3.2.1 Main Flow
+**3.2.1 Main Flow**
 
-The user selects Manage Account.
+1. The user selects Manage Account.
+2. The system displays the user's account information according to their role.
+3. The user views their account information.
+4. The user may choose Change Password or Log out.
+5. The system processes the selected action. Account information displayed by role:
+   * Admin: username, full name, email, and role.
+   * Lecturer: lecturer ID, username, full name, email, and role.
+   * Student: student ID, username, full name, email, major, and role.
 
-The system displays the user's account information according to their role.
+**3.2.2 Alternative Flows**
 
-The user views their account information.
+A1. Duplicate ID: If the entered Student ID or Lecturer ID already exists, the system rejects the account creation and displays an appropriate error message.<br>
+A2. Invalid Email: If the entered Email format is invalid, the system rejects the input and displays an appropriate error message.<br>
+A3. Missing or Invalid User Information: If required user information is missing or invalid, the system does not save the information and displays an appropriate error message.<br>
+A4. Deactivation Cancelled: If the Admin does not confirm the deactivation, the system cancels the operation and the account remains active.<br>
 
-The user may choose Change Password or Log out.
+**3.3 Special Requirements**
 
-The system processes the selected action. Account information displayed by role:
+The current password must be verified before changing the password.<br>
+Passwords shall be protected using a secure password-storage mechanism.<br>
 
-Admin: username, full name, email, and role.
+**3.4 Preconditions**
 
-Lecturer: lecturer ID, username, full name, email, and role.
+The user has successfully logged in.<br>
 
-Student: student ID, username, full name, email, major, and role.
+**3.5 Postconditions**
 
-3.2.2 Alternative Flows
+If the password is changed successfully, the new password is stored securely.<br>
+Otherwise, account information remains unchanged.<br>
 
-A1. Duplicate ID: If the entered Student ID or Lecturer ID already exists, the system rejects the account creation and displays an appropriate error message.
+**3.6 Extension Points**
 
-A2. Invalid Email: If the entered Email format is invalid, the system rejects the input and displays an appropriate error message.
+Change Password.<br>
 
-A3. Missing or Invalid User Information: If required user information is missing or invalid, the system does not save the information and displays an appropriate error message.
+**ADMIN USE CASES**
 
-A4. Deactivation Cancelled: If the Admin does not confirm the deactivation, the system cancels the operation and the account remains active.
+**4. Use Case: Manage User**
 
-3.3 Special Requirements
-
-The current password must be verified before changing the password.
-
-Passwords shall be protected using a secure password-storage mechanism.
-
-3.4 Preconditions
-
-The user has successfully logged in.
-
-3.5 Postconditions
-
-If the password is changed successfully, the new password is stored securely.
-
-Otherwise, account information remains unchanged.
-
-3.6 Extension Points
-
-Change Password.
-
-ADMIN USE CASES
-
-4. Use Case: Manage User
-
-4.1 Summary
+**4.1 Summary**
 
 This use case allows the Admin to manage Student and Lecturer accounts by viewing, searching, creating, editing, and deactivating users.
 
-4.2 Flow of Events
+**4.2 Flow of Events**
 
-4.2.1 Main Flow
+**4.2.1 Main Flow**
 
-The Admin selects Manage User.
+1. The Admin selects Manage User.
+2. The system displays a list of Students and Lecturers.
+3. The Admin chooses an action: View User, Search User, Create User Account, Edit User, or Deactivate User.
+4. The system processes the selected action and displays the result.
 
-The system displays a list of Students and Lecturers.
+**4.2.2 Alternative Flows**
 
-The Admin chooses an action: View User, Search User, Create User Account, Edit User, or Deactivate User.
+A1. Duplicate Major Code: If the entered Major Code already exists, the system rejects the creation and displays an appropriate error message.<br>
+A2. Invalid Major Information: If the Admin enters missing or invalid Major information, the system does not save it and displays an appropriate error message.<br>
+A3. Major Cannot Be Deleted: If the selected Major is still referenced by existing Students or Curriculum data, the system rejects the deletion and displays an appropriate message.<br>
+A4. Deletion Not Confirmed: If the Admin does not confirm the deletion, the Major remains unchanged.<br>
 
-The system processes the selected action and displays the result.
+**4.3 Special Requirements**
 
-4.2.2 Alternative Flows
+Student ID and Lecturer ID must be unique.<br>
+Email addresses must follow a valid format.<br>
+Confirmation is required before deactivating an account.<br>
+The system shall ensure that only one Admin account exists in the system.<br>
 
-A1. Duplicate Major Code: If the entered Major Code already exists, the system rejects the creation and displays an appropriate error message.
+**4.4 Preconditions**
 
-A2. Invalid Major Information: If the Admin enters missing or invalid Major information, the system does not save it and displays an appropriate error message.
+The Admin has successfully logged in.<br>
 
-A3. Major Cannot Be Deleted: If the selected Major is still referenced by existing Students or Curriculum data, the system rejects the deletion and displays an appropriate message.
+**4.5 Postconditions**
 
-A4. Deletion Not Confirmed: If the Admin does not confirm the deletion, the Major remains unchanged.
+Success: Student or Lecturer accounts are created, updated, or deactivated according to the Admin's action.<br>
+Failure: No user data is changed.<br>
 
-4.3 Special Requirements
+**4.6 Extension Points**
 
-Student ID and Lecturer ID must be unique.
+None specified in the FR.<br>
 
-Email addresses must follow a valid format.
+**5. Use Case: Manage Major**
 
-Confirmation is required before deactivating an account.
-
-The system shall ensure that only one Admin account exists in the system.
-
-4.4 Preconditions
-
-The Admin has successfully logged in.
-
-4.5 Postconditions
-
-Success: Student or Lecturer accounts are created, updated, or deactivated according to the Admin's action.
-
-Failure: No user data is changed.
-
-4.6 Extension Points
-
-None specified in the FR.
-
-5. Use Case: Manage Major
-
-5.1 Summary
+**5.1 Summary**
 
 This use case allows the Admin to create, view, edit, and delete Majors.
 
-5.2 Flow of Events
+**5.2 Flow of Events**
 
-5.2.1 Main Flow
+**5.2.1 Main Flow**
 
-The Admin selects Manage Major.
+1. The Admin selects Manage Major.
+2. The system displays a list of Majors, including Major Code and Major Name.
+3. The Admin chooses Create, View, Edit, or Delete Major.
+4. The system processes the selected action.
 
-The system displays a list of Majors, including Major Code and Major Name.
+**5.2.2 Alternative Flows**
 
-The Admin chooses Create, View, Edit, or Delete Major.
+A1. Course Already in Curriculum: If the selected Course already exists in the selected Major's Curriculum, the system does not add the Course and displays an appropriate message.<br>
+A2. Invalid Recommended Semester: If the entered Recommended Semester is invalid, the system does not save the change and displays an appropriate error message.<br>
+A3. Removal Not Confirmed: If the Admin does not confirm the removal, the system cancels the operation and the Curriculum remains unchanged.<br>
 
-The system processes the selected action.
+**5.3 Special Requirements**
 
-5.2.2 Alternative Flows
+Major Code must be unique.<br>
+A Major may only be deleted if it is not referenced by any Student or Curriculum.<br>
+Confirmation is required before deletion.<br>
 
-A1. Course Already in Curriculum: If the selected Course already exists in the selected Major's Curriculum, the system does not add the Course and displays an appropriate message.
+**5.4 Preconditions**
 
-A2. Invalid Recommended Semester: If the entered Recommended Semester is invalid, the system does not save the change and displays an appropriate error message.
+The Admin has successfully logged in.<br>
 
-A3. Removal Not Confirmed: If the Admin does not confirm the removal, the system cancels the operation and the Curriculum remains unchanged.
+**5.5 Postconditions**
 
-5.3 Special Requirements
+Success: The Major is created, updated, or deleted accordingly.<br>
+Failure: No Major data is changed.<br>
 
-Major Code must be unique.
+**5.6 Extension Points**
 
-A Major may only be deleted if it is not referenced by any Student or Curriculum.
+None specified in the FR.<br>
 
-Confirmation is required before deletion.
+**6. Use Case: Manage Curriculum**
 
-5.4 Preconditions
-
-The Admin has successfully logged in.
-
-5.5 Postconditions
-
-Success: The Major is created, updated, or deleted accordingly.
-
-Failure: No Major data is changed.
-
-5.6 Extension Points
-
-None specified in the FR.
-
-6. Use Case: Manage Curriculum
-
-6.1 Summary
+**6.1 Summary**
 
 This use case allows the Admin to select a Major and manage the Courses belonging to that Major's Curriculum, including setting the Recommended Semester for each Course.
 
-6.2 Flow of Events
+**6.2 Flow of Events**
 
-6.2.1 Main Flow
+**6.2.1 Main Flow**
 
-The Admin selects Manage Curriculum.
+1. The Admin selects Manage Curriculum.
+2. The Admin selects a Major.
+3. The system displays Courses belonging to the selected Major's Curriculum, including Course Code, Course Name, Credit, and Recommended Semester.
+4. The Admin chooses Add Course to Curriculum or Remove Course from Curriculum, depending on whether the Course is already included in the selected Major's Curriculum.
+5. The system processes the selected action.
 
-The Admin selects a Major.
+**6.2.2 Alternative Flows**
 
-The system displays Courses belonging to the selected Major's Curriculum, including Course Code, Course Name, Credit, and Recommended Semester.
+A1. Duplicate Course Code: If the entered Course Code already exists, the system rejects the creation and displays an appropriate error message.<br>
+A2. Missing Required Information: If the Admin does not provide all required Course information, the system does not save the Course and displays an appropriate message.<br>
+A3. Invalid Prerequisite Selection: If the Admin selects the Course itself as its Prerequisite, the system rejects the selection and requests the Admin to select another Course.<br>
+A4. Changes Not Confirmed: If the Admin does not confirm the changes, the system cancels the operation and keeps the existing Course information unchanged.<br>
 
-The Admin chooses Add Course to Curriculum or Remove Course from Curriculum, depending on whether the Course is already included in the selected Major's Curriculum.
+**6.3 Special Requirements**
 
-The system processes the selected action.
+A Course cannot be added to the same Major's Curriculum more than once.<br>
+The Course must exist in the Course Catalog before it can be added to a Curriculum.<br>
+Recommended Semester must be a valid value.<br>
+Confirmation is required before removing a Course.<br>
 
-6.2.2 Alternative Flows
+**6.4 Preconditions**
 
-A1. Duplicate Course Code: If the entered Course Code already exists, the system rejects the creation and displays an appropriate error message.
+The Admin has successfully logged in.<br>
+At least one Major exists in the system.<br>
 
-A2. Missing Required Information: If the Admin does not provide all required Course information, the system does not save the Course and displays an appropriate message.
+**6.5 Postconditions**
 
-A3. Invalid Prerequisite Selection: If the Admin selects the Course itself as its Prerequisite, the system rejects the selection and requests the Admin to select another Course.
+Success: The Curriculum is updated with the added or removed Course.<br>
+Failure: The Curriculum remains unchanged.<br>
 
-A4. Changes Not Confirmed: If the Admin does not confirm the changes, the system cancels the operation and keeps the existing Course information unchanged.
+**6.6 Extension Points**
 
-6.3 Special Requirements
+None specified in the FR.<br>
 
-A Course cannot be added to the same Major's Curriculum more than once.
+**7. Use Case: Manage Course**
 
-The Course must exist in the Course Catalog before it can be added to a Curriculum.
-
-Recommended Semester must be a valid value.
-
-Confirmation is required before removing a Course.
-
-6.4 Preconditions
-
-The Admin has successfully logged in.
-
-At least one Major exists in the system.
-
-6.5 Postconditions
-
-Success: The Curriculum is updated with the added or removed Course.
-
-Failure: The Curriculum remains unchanged.
-
-6.6 Extension Points
-
-None specified in the FR.
-
-7. Use Case: Manage Course
-
-7.1 Summary
+**7.1 Summary**
 
 This use case allows the Admin to create, view, search, edit, and delete Courses, and to set a Prerequisite for a Course.
 
-7.2 Flow of Events
+**7.2 Flow of Events**
 
-7.2.1 Main Flow
+**7.2.1 Main Flow**
 
-The Admin selects Manage Course.
+1. The Admin selects Manage Course.
+2. The system displays a list of Courses.
+3. The Admin selects the appropriate action based on the intended task: View Course, Search Course, Create Course, Edit Course, Delete Course, or Set Prerequisite.
+4. The system processes the selected action.
 
-The system displays a list of Courses.
+**7.2.2 Alternative Flows**
 
-The Admin selects the appropriate action based on the intended task: View Course, Search Course, Create Course, Edit Course, Delete Course, or Set Prerequisite.
+A1. Duplicate Course Code: If the entered Course Code already exists, the system rejects the creation and displays an appropriate error message.<br>
+A2. Missing or Invalid Course Information: If required Course information is missing or invalid, the system rejects the input and displays an appropriate error message.<br>
+A3. Invalid Prerequisite: If the selected Prerequisite does not exist or the Course is selected as its own Prerequisite, the system rejects the selection and displays an appropriate error message.<br>
+A4. Deletion Not Confirmed: If the Admin does not confirm the deletion, the Course remains unchanged.<br>
 
-The system processes the selected action.
+**7.3 Special Requirements**
 
-7.2.2 Alternative Flows
+Course Code must be unique.<br>
+A Course cannot be its own Prerequisite.<br>
+Credit must be a positive valid number.<br>
+Confirmation is required before deletion, and deletion must preserve data integrity.<br>
 
-A1. Duplicate Course Code: If the entered Course Code already exists, the system rejects the creation and displays an appropriate error message.
+**7.4 Preconditions**
 
-A2. Missing or Invalid Course Information: If required Course information is missing or invalid, the system rejects the input and displays an appropriate error message.
+The Admin has successfully logged in.<br>
 
-A3. Invalid Prerequisite: If the selected Prerequisite does not exist or the Course is selected as its own Prerequisite, the system rejects the selection and displays an appropriate error message.
+**7.5 Postconditions**
 
-A4. Deletion Not Confirmed: If the Admin does not confirm the deletion, the Course remains unchanged.
+Success: The Course is created, updated, or deleted, or its Prerequisite is set accordingly.<br>
+Failure: No Course data is changed.<br>
 
-7.3 Special Requirements
+**7.6 Extension Points**
 
-Course Code must be unique.
+Set Prerequisite.<br>
 
-A Course cannot be its own Prerequisite.
+**8. Use Case: Manage Semester**
 
-Credit must be a positive valid number.
-
-Confirmation is required before deletion, and deletion must preserve data integrity.
-
-7.4 Preconditions
-
-The Admin has successfully logged in.
-
-7.5 Postconditions
-
-Success: The Course is created, updated, or deleted, or its Prerequisite is set accordingly.
-
-Failure: No Course data is changed.
-
-7.6 Extension Points
-
-Set Prerequisite.
-
-8. Use Case: Manage Semester
-
-8.1 Summary
+**8.1 Summary**
 
 This use case allows the Admin to create, view, edit, and delete academic Semesters.
 
-8.2 Flow of Events
+**8.2 Flow of Events**
 
-8.2.1 Main Flow
+**8.2.1 Main Flow**
 
-The Admin selects Manage Semester.
+1. The Admin selects Manage Semester.
+2. The system displays a list of Semesters.
+3. The Admin chooses Create Semester, View Semester, Edit Semester, or Delete Semester.
+4. The system processes the selected action.
 
-The system displays a list of Semesters.
+**8.2.2 Alternative Flows**
 
-The Admin chooses Create Semester, View Semester, Edit Semester, or Delete Semester.
+A1. Invalid Semester Dates: If the Start Date is not earlier than the End Date, the system rejects the operation and displays an appropriate error message.<br>
+A2. Semester Date Overlap: If the Semester dates overlap with an existing Semester, the system rejects the operation and displays an appropriate error message.<br>
+A3. Semester In Use: If the selected Semester is referenced by existing Registration or academic data, the system does not allow the Semester to be deleted and displays an appropriate message.<br>
+A4. Deletion Not Confirmed: If the Admin does not confirm the deletion, the system cancels the operation and the Semester remains unchanged.<br>
 
-The system processes the selected action.
+**8.3 Special Requirements**
 
-8.2.2 Alternative Flows
+Start Date must be earlier than End Date.<br>
+Semesters must not overlap.<br>
+Confirmation is required before deletion.<br>
+A Semester referenced by Registration or academic data shall not be deleted.<br>
 
-A1. Invalid Semester Dates: If the Start Date is not earlier than the End Date, the system rejects the operation and displays an appropriate error message.
+**8.4 Preconditions**
 
-A2. Semester Date Overlap: If the Semester dates overlap with an existing Semester, the system rejects the operation and displays an appropriate error message.
+The Admin has successfully logged in.<br>
 
-A3. Semester In Use: If the selected Semester is referenced by existing Registration or academic data, the system does not allow the Semester to be deleted and displays an appropriate message.
+**8.5 Postconditions**
 
-A4. Deletion Not Confirmed: If the Admin does not confirm the deletion, the system cancels the operation and the Semester remains unchanged.
+Success: The Semester is created, updated, or deleted accordingly.<br>
+Failure: No Semester data is changed.<br>
 
-8.3 Special Requirements
+**8.6 Extension Points**
 
-Start Date must be earlier than End Date.
+None specified in the FR.<br>
 
-Semesters must not overlap.
+**9. Use Case: Manage Registration Period**
 
-Confirmation is required before deletion.
-
-A Semester referenced by Registration or academic data shall not be deleted.
-
-8.4 Preconditions
-
-The Admin has successfully logged in.
-
-8.5 Postconditions
-
-Success: The Semester is created, updated, or deleted accordingly.
-
-Failure: No Semester data is changed.
-
-8.6 Extension Points
-
-None specified in the FR.
-
-9. Use Case: Manage Registration Period
-
-9.1 Summary
+**9.1 Summary**
 
 This use case allows the Admin to select a Semester its Course Registration Period. The Registration Period's status (Scheduled, Open, or Closed) is determined automatically by the system based on the current date, without requiring the Admin to manually open or close it.
 
-9.2 Flow of Events
+**9.2 Flow of Events**
 
-9.2.1 Main Flow
+**9.2.1 Main Flow**
 
-The Admin selects Manage Registration Period.
+1. The Admin selects Manage Registration Period.
+2. The Admin selects a Semester.
+3. The Admin enters the Registration Start Date and Registration End Date.
+4. The Admin confirms the schedule.
+5. The system validates the Registration Start and End dates.
+6. The system saves the Registration Period.
+7. The system automatically determines the Registration Status (Scheduled, Open, or Closed) based on the current date.
+8. The system displays the Registration Start Date/Time, Registration End Date/Time, and the current Registration Status.
 
-The Admin selects a Semester.
+**9.2.2 Alternative Flows**
 
-The Admin enters the Registration Start Date and Registration End Date.
+A1. Invalid Registration Period: If the Registration Start Date/Time is not earlier than the Registration End Date/Time, the system rejects the input and displays an appropriate error message..<br>
 
-The Admin confirms the schedule.
+**9.3 Special Requirements**
 
-The system validates the Registration Start and End dates.
+Registration Start Date/Time must be earlier than Registration End Date/Time.<br>
+The Registration Period must fall within the selected Semester.<br>
+The Registration Status shall be automatically determined by the system based on the current date and the configured Start/End dates — the Admin does not manually open or close Registration.<br>
+Each Semester may have zero or more Registration Periods.<br>
+The system shall remain responsive during peak course-registration periods.<br>
 
-The system saves the Registration Period.
+**9.4 Preconditions**
 
-The system automatically determines the Registration Status (Scheduled, Open, or Closed) based on the current date.
+The Admin has successfully logged in. clicked on Semester<br>
+At least one Semester exists.<br>
 
-The system displays the Registration Start Date/Time, Registration End Date/Time, and the current Registration Status.
+**9.5 Postconditions**
 
-9.2.2 Alternative Flows
+Success: The Registration Period is configured for the selected Semester, and its status is automatically reflected as Scheduled, Open, or Closed.<br>
+Failure: The Registration Period remains unchanged.<br>
 
-A1. Invalid Registration Period: If the Registration Start Date/Time is not earlier than the Registration End Date/Time, the system rejects the input and displays an appropriate error message..
+**9.6 Extension Points**
 
-9.3 Special Requirements
+None specified in the FR.<br>
 
-Registration Start Date/Time must be earlier than Registration End Date/Time.
+**10. Use Case: Manage Registration Demand**
 
-The Registration Period must fall within the selected Semester.
-
-The Registration Status shall be automatically determined by the system based on the current date and the configured Start/End dates — the Admin does not manually open or close Registration.
-
-Each Semester may have zero or more Registration Periods.
-
-The system shall remain responsive during peak course-registration periods.
-
-9.4 Preconditions
-
-The Admin has successfully logged in. clicked on Semester
-
-At least one Semester exists.
-
-9.5 Postconditions
-
-Success: The Registration Period is configured for the selected Semester, and its status is automatically reflected as Scheduled, Open, or Closed.
-
-Failure: The Registration Period remains unchanged.
-
-9.6 Extension Points
-
-None specified in the FR.
-
-10. Use Case: Manage Registration Demand
-
-10.1 Summary
+**10.1 Summary**
 
 This use case allows the Admin to select a Semester and a Major, view registration demand per Course within that Major, view the Student registration list, search Courses, and generate a Registration Demand Report.
 
-10.2 Flow of Events
+**10.2 Flow of Events**
 
-10.2.1 Main Flow
+**10.2.1 Main Flow**
 
-The Admin selects Manage Registration Demand.
+1. The Admin selects Manage Registration Demand.
+2. The Admin selects a Registration Period.
+3. The Admin selects a Major.
+4. The system displays the Courses belonging to the selected Major.
+5. For each Course, the system displays the Number of Registered Students.
+6. The Admin selects a Course.
+7. The system displays the list of Students registered for the selected Course.
 
-The Admin selects a Registration Period.
+**10.2.2 Alternative Flows**
 
-The Admin selects a Major.
+A1. No Courses Found: If no Courses are found for the selected Major, the system displays an appropriate message.<br>
+A2. No Students Registered: If no Students have registered for the selected Course during the selected Registration Period, the system displays an appropriate message.<br>
 
-The system displays the Courses belonging to the selected Major.
+**10.3 Special Requirements**
 
-For each Course, the system displays the Number of Registered Students.
+Registration Demand data must remain consistent with the current registration records.<br>
+Generated reports must accurately reflect the registration data.<br>
+Requests shall be processed within 3 seconds under normal operating conditions.<br>
 
-The Admin selects a Course.
+**10.4 Preconditions**
 
-The system displays the list of Students registered for the selected Course.
+The Admin has successfully logged in.<br>
+At least one Semester exists.<br>
 
-10.2.2 Alternative Flows
+**10.5 Postconditions**
 
-A1. No Courses Found: If no Courses are found for the selected Major, the system displays an appropriate message.
+Registration demand information is displayed and, when requested, a report is generated.<br>
+No Registration data is modified.<br>
 
-A2. No Students Registered: If no Students have registered for the selected Course during the selected Registration Period, the system displays an appropriate message.
+**10.6 Extension Points**
 
-10.3 Special Requirements
+Generate Registration Demand Report.<br>
 
-Registration Demand data must remain consistent with the current registration records.
+**11. Use Case: Assign Lecturer**
 
-Generated reports must accurately reflect the registration data.
-
-Requests shall be processed within 3 seconds under normal operating conditions.
-
-10.4 Preconditions
-
-The Admin has successfully logged in.
-
-At least one Semester exists.
-
-10.5 Postconditions
-
-Registration demand information is displayed and, when requested, a report is generated.
-
-No Registration data is modified.
-
-10.6 Extension Points
-
-Generate Registration Demand Report.
-
-11. Use Case: Assign Lecturer
-
-11.1 Summary
+**11.1 Summary**
 
 This use case allows the Admin to select a Major and a Course, view Lecturers who are qualified to teach that Course, and assign a qualified Lecturer to the Course.
 
-11.2 Flow of Events
+**11.2 Flow of Events**
 
-11.2.1 Main Flow
+**11.2.1 Main Flow**
 
-The Admin selects Assign Lecturer.
+1. The Admin selects Assign Lecturer.
+2. The Admin selects a Major.
+3. The Admin selects a Course.
+4. The system identifies Lecturers who are qualified to teach the selected Course.
+5. The system displays the list of qualified Lecturers.
+6. The Admin selects a qualified Lecturer.
+7. The system validates the Lecturer's qualification.
+8. The system assigns the Lecturer to the Course.
+9. The system displays a success message.
 
-The Admin selects a Major.
+**11.2.2 Alternative Flows**
 
-The Admin selects a Course.
+A1. No Assigned Courses: If no Courses are assigned to the Lecturer for the selected Semester, the system displays an appropriate message.<br>
 
-The system identifies Lecturers who are qualified to teach the selected Course.
+**11.3 Special Requirements**
 
-The system displays the list of qualified Lecturers.
+Only Lecturers who are qualified to teach the selected Course can be assigned.<br>
+A Teaching Assignment shall reference an existing Lecturer and a valid Course.<br>
+The system shall prevent invalid Lecturer-Course assignments.<br>
+Requests shall be processed within 3 seconds under normal operating conditions.<br>
 
-The Admin selects a qualified Lecturer.
+**11.4 Preconditions**
 
-The system validates the Lecturer's qualification.
+The Admin has successfully logged in.<br>
+At least one Course exists.<br>
 
-The system assigns the Lecturer to the Course.
+**11.5 Postconditions**
 
-The system displays a success message.
+Success: The Teaching Assignment is saved and a success message is displayed.<br>
+Failure: No Teaching Assignment is created.<br>
 
-11.2.2 Alternative Flows
+**11.6 Extension Points**
 
-A1. No Assigned Courses: If no Courses are assigned to the Lecturer for the selected Semester, the system displays an appropriate message.
+None specified in the FR.<br>
 
-11.3 Special Requirements
+**LECTURER USE CASES**
 
-Only Lecturers who are qualified to teach the selected Course can be assigned.
+**12. Use Case: Manage Teaching Course**
 
-A Teaching Assignment shall reference an existing Lecturer and a valid Course.
-
-The system shall prevent invalid Lecturer-Course assignments.
-
-Requests shall be processed within 3 seconds under normal operating conditions.
-
-11.4 Preconditions
-
-The Admin has successfully logged in.
-
-At least one Course exists.
-
-11.5 Postconditions
-
-Success: The Teaching Assignment is saved and a success message is displayed.
-
-Failure: No Teaching Assignment is created.
-
-11.6 Extension Points
-
-None specified in the FR.
-
-LECTURER USE CASES
-
-12. Use Case: Manage Teaching Course
-
-12.1 Summary
+**12.1 Summary**
 
 This use case allows the Lecturer to select a Semester and view the Courses directly assigned to them by the Admin. The Lecturer cannot self-select, request, or modify their teaching assignment.
 
-12.2 Flow of Events
+**12.2 Flow of Events**
 
-12.2.1 Main Flow
+**12.2.1 Main Flow**
 
-The Lecturer selects Manage Teaching Course.
+1. The Lecturer selects Manage Teaching Course.
+2. The Lecturer selects a Semester.
+3. The system retrieves Courses assigned to the Lecturer by the Admin for the selected Semester.
+4. The system displays Course Code, Course Name, Credit, and Prerequisite.
+5. The Lecturer selects an assigned Course.
+6. The system displays the details of the selected Course.
 
-The Lecturer selects a Semester.
+**12.2.2 Alternative Flows**
 
-The system retrieves Courses assigned to the Lecturer by the Admin for the selected Semester.
+A1. No Courses Assigned: If no Courses have been assigned to the Lecturer for the selected Semester, the system displays an appropriate message.<br>
+A2. Assignment Changed by Admin: When the Admin creates, changes, or removes a Teaching Assignment, the system updates the Lecturer's teaching Course list accordingly.<br>
 
-The system displays Course Code, Course Name, Credit, and Prerequisite.
+**12.3 Special Requirements**
 
-The Lecturer selects an assigned Course.
+Teaching-course viewing shall respond within 3 seconds under normal operating conditions.<br>
+Lecturers shall only access Courses assigned to them by the Admin.<br>
+The Lecturer shall not independently select, register for, request, self-assign, or modify a Course assignment.<br>
 
-The system displays the details of the selected Course.
+**12.4 Preconditions**
 
-12.2.2 Alternative Flows
+The Lecturer has successfully logged in.<br>
+A Semester is selected.<br>
 
-A1. No Courses Assigned: If no Courses have been assigned to the Lecturer for the selected Semester, the system displays an appropriate message.
+**12.5 Postconditions**
 
-A2. Assignment Changed by Admin: When the Admin creates, changes, or removes a Teaching Assignment, the system updates the Lecturer's teaching Course list accordingly.
+The Lecturer can view the current list of Courses assigned by the Admin.<br>
+No Teaching Assignment is modified by the Lecturer.<br>
+Display the list of subjects analyzed by the administrator.<br>
 
-12.3 Special Requirements
+**12.6 Extension Points**
 
-Teaching-course viewing shall respond within 3 seconds under normal operating conditions.
+None specified in the FR.<br>
 
-Lecturers shall only access Courses assigned to them by the Admin.
+**13. Use Case: Manage Student Grades**
 
-The Lecturer shall not independently select, register for, request, self-assign, or modify a Course assignment.
-
-12.4 Preconditions
-
-The Lecturer has successfully logged in.
-
-A Semester is selected.
-
-12.5 Postconditions
-
-The Lecturer can view the current list of Courses assigned by the Admin.
-
-No Teaching Assignment is modified by the Lecturer.
-
-Display the list of subjects analyzed by the administrator.
-
-12.6 Extension Points
-
-None specified in the FR.
-
-13. Use Case: Manage Student Grades
-
-13.1 Summary
+**13.1 Summary**
 
 This use case allows the Lecturer to select a Semester and a Course assigned to them, view Students registered in that Course, view a Student's Prerequisite status, and enter or update the Student's Grade.
 
-13.2 Flow of Events
+**13.2 Flow of Events**
 
-13.2.1 Main Flow
+**13.2.1 Main Flow**
 
-The Lecturer selects Manage Student Grades.
+1. The Lecturer selects Manage Student Grades.
+2. The Lecturer selects a Semester.
+3. The system checks that the Registration Period for the selected Semester has ended.
+4. The system displays the Courses assigned to the Lecturer by the Admin for the selected Semester.
+5. The Lecturer selects an assigned Course.
+6. The system displays the Students registered in the selected Course, including Student ID, Student Name, and Email.
+7. The Lecturer selects a Student to view the Student's information.
+8. The Lecturer enters or updates the Student's Grade.
+9. The system validates the Grade, the Student's Registration, and the Lecturer's Course assignment.
+10. If the validation succeeds, the system saves the Grade.
+11. The system displays a success message.
 
-The Lecturer selects a Semester.
+**13.2.2 Alternative Flows**
 
-The system checks that the Registration Period for the selected Semester has ended.
+A1. Invalid Grade: If the entered Grade is invalid, the system does not save the Grade and displays an appropriate error message.<br>
+A2. Student Not Registered: If the Student is not registered in the selected Course, the system does not allow the Lecturer to enter or update the Grade and displays an appropriate message.<br>
+A3. Course Not Assigned: If the selected Course is not assigned to the Lecturer, the system does not allow the Lecturer to manage Grades for that Course and displays an appropriate message.<br>
+A4. Grade Save Failed: If the Grade cannot be saved, the system displays an appropriate error message and the existing Grade data remains unchanged.<br>
 
-The system displays the Courses assigned to the Lecturer by the Admin for the selected Semester.
+**13.3 Special Requirements**
 
-The Lecturer selects an assigned Course.
+Grade entry and updating shall respond within 3 seconds under normal operating conditions.<br>
+A Grade shall reference an existing Student and Course.<br>
+Grade data shall remain associated with the correct Student, Course, Lecturer, and Semester.<br>
+Lecturers shall only view Students and enter or update Grades for Courses assigned to them.<br>
+The Lecturer may view the Student's Prerequisite status for the selected Course but shall not modify it. Failed transactions shall not leave partial or invalid data.<br>
 
-The system displays the Students registered in the selected Course, including Student ID, Student Name, and Email.
+**13.4 Preconditions**
 
-The Lecturer selects a Student to view the Student's information.
+The Lecturer has successfully logged in.<br>
+The selected Semester exists.<br>
+The selected Course is assigned to the Lecturer.<br>
+The Student is registered in the selected Course.<br>
 
-The Lecturer enters or updates the Student's Grade.
+**13.5 Postconditions**
 
-The system validates the Grade, the Student's Registration, and the Lecturer's Course assignment.
+Success: The valid Grade is stored or updated for the correct Student and Course.<br>
+Failure: Existing Grade data remains valid and no invalid Grade is stored.<br>
 
-If the validation succeeds, the system saves the Grade.
+**13.6 Extension Points**
 
-The system displays a success message.
+None specified in the FR.<br>
 
-13.2.2 Alternative Flows
+**STUDENT USE CASES**
 
-A1. Invalid Grade: If the entered Grade is invalid, the system does not save the Grade and displays an appropriate error message.
+**14. Use Case: View Courses**
 
-A2. Student Not Registered: If the Student is not registered in the selected Course, the system does not allow the Lecturer to enter or update the Grade and displays an appropriate message.
-
-A3. Course Not Assigned: If the selected Course is not assigned to the Lecturer, the system does not allow the Lecturer to manage Grades for that Course and displays an appropriate message.
-
-A4. Grade Save Failed: If the Grade cannot be saved, the system displays an appropriate error message and the existing Grade data remains unchanged.
-
-13.3 Special Requirements
-
-Grade entry and updating shall respond within 3 seconds under normal operating conditions.
-
-A Grade shall reference an existing Student and Course.
-
-Grade data shall remain associated with the correct Student, Course, Lecturer, and Semester.
-
-Lecturers shall only view Students and enter or update Grades for Courses assigned to them.
-
-The Lecturer may view the Student's Prerequisite status for the selected Course but shall not modify it. Failed transactions shall not leave partial or invalid data.
-
-13.4 Preconditions
-
-The Lecturer has successfully logged in.
-
-The selected Semester exists.
-
-The selected Course is assigned to the Lecturer.
-
-The Student is registered in the selected Course.
-
-13.5 Postconditions
-
-Success: The valid Grade is stored or updated for the correct Student and Course.
-
-Failure: Existing Grade data remains valid and no invalid Grade is stored.
-
-13.6 Extension Points
-
-None specified in the FR.
-
-STUDENT USE CASES
-
-14. Use Case: View Courses
-
-14.1 Summary
+**14.1 Summary**
 
 This use case allows the Student to view Courses belonging to their Major, search Courses by Course Code or Course Name, and view detailed Course information.
 
-14.2 Flow of Events
+**14.2 Flow of Events**
 
-14.2.1 Main Flow
+**14.2.1 Main Flow**
 
-The Student selects View Courses.
+1. The Student selects View Courses.
+2. The system identifies the Student's Major.
+3. The system displays Courses belonging to the Student's Major.
+4. The Student may search for a Course using Course Code or Course Name.
+5. The Student selects a Course.
+6. The system displays Course Code, Course Name, Credit, Prerequisite, and Recommended Semester.
+7. The Student views the Course information.
 
-The system identifies the Student's Major.
+**14.2.2 Alternative Flows**
 
-The system displays Courses belonging to the Student's Major.
+A1. Course Not Found: If no Course matches the entered Course Code or Course Name, the system displays an appropriate message.<br>
 
-The Student may search for a Course using Course Code or Course Name.
+**14.3 Special Requirements**
 
-The Student selects a Course.
+Course, prerequisite, and recommended-semester information shall be presented clearly.<br>
+Course viewing requests shall be processed within 3 seconds under normal operating conditions.<br>
 
-The system displays Course Code, Course Name, Credit, Prerequisite, and Recommended Semester.
+**14.4 Preconditions**
 
-The Student views the Course information.
+The Student has successfully logged in.<br>
+The student's major is already in the system.<br>
 
-14.2.2 Alternative Flows
+**14.5 Postconditions**
 
-A1. Course Not Found: If no Course matches the entered Course Code or Course Name, the system displays an appropriate message.
+The requested Course information is displayed.<br>
+No Course or Student data is modified.<br>
 
-14.3 Special Requirements
+**14.6 Extension Points**
 
-Course, prerequisite, and recommended-semester information shall be presented clearly.
+None specified in the FR.<br>
 
-Course viewing requests shall be processed within 3 seconds under normal operating conditions.
+**15. Use Case: Course Registration**
 
-14.4 Preconditions
-
-The Student has successfully logged in.
-
-The student's major is already in the system.
-
-14.5 Postconditions
-
-The requested Course information is displayed.
-
-No Course or Student data is modified.
-
-14.6 Extension Points
-
-None specified in the FR.
-
-15. Use Case: Course Registration
-
-15.1 Summary
+**15.1 Summary**
 
 This use case allows the Student to select and register for an available Course belonging to the Student's Major/Curriculum. Before confirmation, the system validates the Registration Period, Prerequisite requirements, and duplicate registration.
 
-15.2 Flow of Events
+**15.2 Flow of Events**
 
-15.2.1 Main Flow
+**15.2.1 Main Flow**
 
-The Student selects a Course to register from the available Courses. The Student may select a recommended Course or another available Course.
+1. The Student selects a Course to register from the available Courses. The Student may select a recommended Course or another available Course.
+2. The system checks whether the Registration Period is open.
+3. The system checks whether the Student has satisfied the required Prerequisite.
+4. The system verifies that the Student does not already have an active registration for the same Course.
+5. If all checks pass, the system allows the Student to confirm the registration.
+6. The Student confirms the registration.
+7. The system saves the Registration.
+8. The system displays a success message.
 
-The system checks whether the Registration Period is open.
+**15.2.2 Alternative Flows**
 
-The system checks whether the Student has satisfied the required Prerequisite.
+A1. Registration Period Not Open: If the Registration Period is not open, the system rejects the registration and displays an appropriate error message.<br>
+A2. Prerequisite Not Satisfied: If the Student has not satisfied the required Prerequisite, the system rejects the registration and displays an appropriate error message.<br>
+A3. Duplicate Registration: If the Student already has an active Registration for the selected Course, the system rejects the registration and displays an appropriate error message.<br>
+A4. Student Does Not Confirm: If the Student does not confirm the registration, no Registration record is created.<br>
 
-The system verifies that the Student does not already have an active registration for the same Course.
+**15.3 Special Requirements**
 
-If all checks pass, the system allows the Student to confirm the registration.
+Registration shall be processed within 3 seconds under normal operating conditions.<br>
+The system shall prevent duplicate active registrations.<br>
+Registration transactions shall be processed atomically.<br>
+Simultaneous registration requests shall not result in lost transactions or inconsistent data.<br>
+A Student shall only register for Courses belonging to the Student's assigned Major.<br>
 
-The Student confirms the registration.
+**15.4 Preconditions**
 
-The system saves the Registration.
+The Student has successfully logged in.<br>
+The Student has selected an available Course to register.<br>
 
-The system displays a success message.
+**15.5 Postconditions**
 
-15.2.2 Alternative Flows
+Success: A valid Registration record is saved and a success message is displayed.<br>
+Failure: No invalid or partial Registration record is stored.<br>
 
-A1. Registration Period Not Open: If the Registration Period is not open, the system rejects the registration and displays an appropriate error message.
+**15.6 Extension Points**
 
-A2. Prerequisite Not Satisfied: If the Student has not satisfied the required Prerequisite, the system rejects the registration and displays an appropriate error message.
+None specified in the FR.<br>
 
-A3. Duplicate Registration: If the Student already has an active Registration for the selected Course, the system rejects the registration and displays an appropriate error message.
+**16. Use Case: View Registration Status**
 
-A4. Student Does Not Confirm: If the Student does not confirm the registration, no Registration record is created.
-
-15.3 Special Requirements
-
-Registration shall be processed within 3 seconds under normal operating conditions.
-
-The system shall prevent duplicate active registrations.
-
-Registration transactions shall be processed atomically.
-
-Simultaneous registration requests shall not result in lost transactions or inconsistent data.
-
-A Student shall only register for Courses belonging to the Student's assigned Major.
-
-15.4 Preconditions
-
-The Student has successfully logged in.
-
-The Student has selected an available Course to register.
-
-15.5 Postconditions
-
-Success: A valid Registration record is saved and a success message is displayed.
-
-Failure: No invalid or partial Registration record is stored.
-
-15.6 Extension Points
-
-None specified in the FR.
-
-16. Use Case: View Registration Status
-
-16.1 Summary
+**16.1 Summary**
 
 This use case allows the Student to select a Semester and view registered Courses, Course registration status, and Registration Period information.
 
-16.2 Flow of Events
+**16.2 Flow of Events**
 
-16.2.1 Main Flow
+**16.2.1 Main Flow**
 
-The Student selects View Registration Status.
+1. The Student selects View Registration Status.
+2. The Student selects a Semester.
+3. The system retrieves the Student's Course registration information.
+4. The system displays Course Code, Course Name, Credit, and Registration Status.
+5. The system displays Semester, Registration Start Date, Registration End Date, and Current Registration Status.
+6. The system displays the Course registration status as Registered or Dropped.
 
-The Student selects a Semester.
+**16.2.2 Alternative Flows**
 
-The system retrieves the Student's Course registration information.
+A1. No Registration Record: If the Student has no registration information for the selected Semester, the system displays an appropriate message.<br>
 
-The system displays Course Code, Course Name, Credit, and Registration Status.
+**16.3 Special Requirements**
 
-The system displays Semester, Registration Start Date, Registration End Date, and Current Registration Status.
+Registration status shall be displayed clearly, including Registered and Dropped.<br>
+Registration information must remain associated with the correct Student and Course.<br>
 
-The system displays the Course registration status as Registered or Dropped.
+**16.4 Preconditions**
 
-16.2.2 Alternative Flows
+The Student has successfully logged in.<br>
+A Semester has been selected.<br>
 
-A1. No Registration Record: If the Student has no registration information for the selected Semester, the system displays an appropriate message.
+**16.5 Postconditions**
 
-16.3 Special Requirements
+The Student's Registration Status and Registration Period information are displayed.<br>
+No Registration data is modified.<br>
 
-Registration status shall be displayed clearly, including Registered and Dropped.
+**16.6 Extension Points**
 
-Registration information must remain associated with the correct Student and Course.
+None specified in the FR.<br>
 
-16.4 Preconditions
+**17. Use Case: Drop Course**
 
-The Student has successfully logged in.
-
-A Semester has been selected.
-
-16.5 Postconditions
-
-The Student's Registration Status and Registration Period information are displayed.
-
-No Registration data is modified.
-
-16.6 Extension Points
-
-None specified in the FR.
-
-17. Use Case: Drop Course
-
-17.1 Summary
+**17.1 Summary**
 
 This use case allows the Student to select and drop a previously registered Course when the Drop Period is still open.
 
-17.2 Flow of Events
+**17.2 Flow of Events**
 
-17.2.1 Main Flow
+**17.2.1 Main Flow**
 
-The Student selects Drop Course.
+1. The Student selects Drop Course.
+2. The system displays the Student's actively registered Courses.
+3. The Student selects a Course to drop.
+4. The system verifies that the Drop Period is still open.
+5. If the Drop Period is open, the system asks the Student to confirm the drop.
+6. The Student confirms dropping the Course.
+7. The system updates the Registration Status to Dropped.
+8. The system displays a success message.
 
-The system displays the Student's actively registered Courses.
+**17.2.2 Alternative Flows**
 
-The Student selects a Course to drop.
+A1. Drop Period Closed: If the Drop Period is no longer open, the system rejects the drop request and displays an appropriate error message.<br>
+A2. Student Does Not Confirm: If the Student does not confirm the drop, the system cancels the operation and the Registration remains unchanged.<br>
 
-The system verifies that the Drop Period is still open.
+**17.3 Special Requirements**
 
-If the Drop Period is open, the system asks the Student to confirm the drop.
+Course dropping shall be processed within 3 seconds under normal operating conditions.<br>
+The system shall reliably process the operation and roll back incomplete changes if the transaction fails.<br>
+Registration data shall remain consistent after the Course is dropped.<br>
 
-The Student confirms dropping the Course.
+**17.4 Preconditions**
 
-The system updates the Registration Status to Dropped.
+The Student has successfully logged in.<br>
+The Student has previously registered for the selected Course.<br>
 
-The system displays a success message.
+**17.5 Postconditions**
 
-17.2.2 Alternative Flows
+Success: The Registration Status is updated to Dropped, and the Course is no longer active.<br>
+Failure: The existing Registration information remains unchanged.<br>
 
-A1. Drop Period Closed: If the Drop Period is no longer open, the system rejects the drop request and displays an appropriate error message.
+**17.6 Extension Points**
 
-A2. Student Does Not Confirm: If the Student does not confirm the drop, the system cancels the operation and the Registration remains unchanged.
+None specified in the FR.<br>
 
-17.3 Special Requirements
+**18. Use Case: View Grades**
 
-Course dropping shall be processed within 3 seconds under normal operating conditions.
-
-The system shall reliably process the operation and roll back incomplete changes if the transaction fails.
-
-Registration data shall remain consistent after the Course is dropped.
-
-17.4 Preconditions
-
-The Student has successfully logged in.
-
-The Student has previously registered for the selected Course.
-
-17.5 Postconditions
-
-Success: The Registration Status is updated to Dropped, and the Course is no longer active.
-
-Failure: The existing Registration information remains unchanged.
-
-17.6 Extension Points
-
-None specified in the FR.
-
-18. Use Case: View Grades
-
-18.1 Summary
+**18.1 Summary**
 
 This use case allows the Student to select a Semester and view their own Grades and Result Status for Courses.
 
-18.2 Flow of Events
+**18.2 Flow of Events**
 
-18.2.1 Main Flow
+**18.2.1 Main Flow**
 
-The Student selects View Grades.
+1. The Student selects View Grades.
+2. The Student selects a Semester.
+3. The system retrieves the Student's Grade information.
+4. The system displays Course Code, Course Name, Credit, Grade, and Semester.
+5. The system automatically uses the Grade to determine the Result Status.
+6. The system displays the Result Status as Passed or Not Passed.
+7. The Student views their Grade information.
 
-The Student selects a Semester.
+**18.2.2 Alternative Flows**
 
-The system retrieves the Student's Grade information.
+A1. Grade Not Yet Entered: If a Grade has not yet been entered, the system displays an appropriate message instead of presenting a completed Grade result.<br>
 
-The system displays Course Code, Course Name, Credit, Grade, and Semester.
+**18.3 Special Requirements**
 
-The system automatically uses the Grade to determine the Result Status.
+The Student shall only be able to view their own Grades.<br>
+Grade data shall remain associated with the correct Student, Course, Lecturer, and Semester.<br>
+Grade viewing requests shall be processed within 3 seconds under normal operating conditions.<br>
+Unauthorized access to another Student's Grades shall be rejected.<br>
 
-The system displays the Result Status as Passed or Not Passed.
+**18.4 Preconditions**
 
-The Student views their Grade information.
+The Student has successfully logged in.<br>
 
-18.2.2 Alternative Flows
+**18.5 Postconditions**
 
-A1. Grade Not Yet Entered: If a Grade has not yet been entered, the system displays an appropriate message instead of presenting a completed Grade result.
+The Student's Grade and Result Status information is displayed.<br>
+No Grade data is modified.<br>
 
-18.3 Special Requirements
+**18.6 Extension Points**
 
-The Student shall only be able to view their own Grades.
-
-Grade data shall remain associated with the correct Student, Course, Lecturer, and Semester.
-
-Grade viewing requests shall be processed within 3 seconds under normal operating conditions.
-
-Unauthorized access to another Student's Grades shall be rejected.
-
-18.4 Preconditions
-
-The Student has successfully logged in.
-
-18.5 Postconditions
-
-The Student's Grade and Result Status information is displayed.
-
-No Grade data is modified.
-
-18.6 Extension Points
-
-None specified in the FR.
+None specified in the FR.<br>
 
 ## V. Class Diagram
 <img width="803" height="974" alt="Class_Diagram thyy" src="https://github.com/user-attachments/assets/69d23003-0669-41ad-abf0-35354460bd03" />
