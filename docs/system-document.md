@@ -457,9 +457,8 @@ including:
 | 17 | Assign Lecturer | Allows the Admin to assign qualified lecturers to courses. |
 
 
-**2. Use Case: Login**
-
-**2.1 Summary**
+### 2. Use Case: Login
+#### 2.1 Summary
 
 This use case allows Admin, Lecturer, and Student to log in to the Course Registration System using valid account credentials and access functions according to their role.
 
