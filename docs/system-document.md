@@ -427,6 +427,7 @@ including:
 
 ## IV. Use case Diagram
 ### 1. Overview Diagram
+<img width="1602" height="2172" alt="UCFINAL" src="https://github.com/user-attachments/assets/1a95c490-e634-46f1-838d-a9e3e8f21c32" />
 
 ### 1.1. List of Actor
 | STT | Actor | Meaning |
