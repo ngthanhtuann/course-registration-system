@@ -1209,6 +1209,6 @@ No Grade data is modified.<br>
 None specified in the FR.<br>
 
 ## V. Class Diagram
-<img width="803" height="974" alt="Class_Diagram thyy" src="https://github.com/user-attachments/assets/69d23003-0669-41ad-abf0-35354460bd03" />
+<img width="803" height="974" alt="classFinal" src="https://github.com/user-attachments/assets/6701f9b6-81e4-49ef-be4d-b8c251302111" />
 
 ## VI. Data Model
