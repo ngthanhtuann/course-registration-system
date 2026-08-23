@@ -1212,6 +1212,7 @@ None specified in the FR.<br>
 <img width="803" height="974" alt="classFinal" src="https://github.com/user-attachments/assets/6701f9b6-81e4-49ef-be4d-b8c251302111" />
 
 ## VI. Data Model
-<img width="1172" height="1012" alt="DATA_MODEL drawio" src="https://github.com/user-attachments/assets/84e8abc9-9fff-44ee-89ce-7b45d9f2e0a2" />
+<img width="1172" height="1012" alt="DATA_MODEL_final drawio" src="https://github.com/user-attachments/assets/df33eb66-ab00-42b3-a99e-77b2473790d7" />
+
 
 ## VII. Interface Design Description
