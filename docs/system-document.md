@@ -429,13 +429,13 @@ including:
 ### 1. Overview Diagram
 <img width="1602" height="2172" alt="UCFINAL" src="https://github.com/user-attachments/assets/1a95c490-e634-46f1-838d-a9e3e8f21c32" />
 
-### 1.1. List of Actor
+#### 1.1. List of Actor
 | STT | Actor | Meaning |
 | :--- | :--- | :--- |
 | 1 | Student | Users who register, search and manage their courses in the system. |
 | 2 | Lecturer | Users who teach courses and view teaching-related information. |
 | 3 | Administrator | System administrators who manage courses, lecturers, and registration policies. |
-### 1.2. List of Use-cases
+#### 1.2. List of Use-cases
 | STT | Use Case | Meaning |
 | :--- | :--- | :--- |
 | 1 | Login | Allows the Student, Lecturer, Admin to log in to the system using valid account credentials and access functions according to their role. |
@@ -462,9 +462,9 @@ including:
 
 This use case allows Admin, Lecturer, and Student to log in to the Course Registration System using valid account credentials and access functions according to their role.
 
-**2.2 Flow of Events**
+#### 2.2 Flow of Events
 
-**2.2.1 Main Flow**
+##### 2.2.1 Main Flow
 
 1. The user selects the Login function.
 2. The system requests the username and password.
@@ -475,31 +475,31 @@ This use case allows Admin, Lecturer, and Student to log in to the Course Regist
 7. If all credentials are valid, the system authenticates the user and determines access permissions based on the role.
 8. The system grants access to the functions available for that role.
 
-**2.2.2 Alternative Flows**
+##### 2.2.2 Alternative Flows
 
 A1. Invalid Username: If the username does not exist, the system displays an appropriate error message and requests reentry.<br>
 A2. Incorrect Password: If the password is incorrect, the system displays an appropriate error message and requests reentry.<br>
 A3. Inactive Account: If the account is not active, the system does not grant access.<br>
 A4. Too Many Failed Login Attempts: After 5 consecutive failed login attempts for the same account, the system temporarily blocks further login attempts for 15 minutes.<br>
 
-**2.3 Special Requirements**
+### 2.3 Special Requirements
 
 The system shall respond to login requests within 3 seconds under normal operating conditions.<br>
 Passwords shall not be stored as plain text and shall use a secure password-storage mechanism.<br>
 The system shall enforce role-based access control.<br>
 
-**2.4 Preconditions**
+### 2.4 Preconditions
 
 The user has a valid account in the system.<br>
 The account is active.<br>
 The user is not currently logged in.<br>
 
-**2.5 Postconditions**
+### 2.5 Postconditions
 
 Success: The user is authenticated and granted access according to the assigned role.<br>
 Failure: Access is not granted and an appropriate error message is displayed.<br>
 
-**2.6 Extension Points**
+### 2.6 Extension Points
 
 None specified in the FR.<br>
 
