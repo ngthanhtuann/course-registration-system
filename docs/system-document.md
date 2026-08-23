@@ -1159,5 +1159,6 @@ message instead of presenting a completed Grade result.
 * None.
 
 ## V. Class Diagram
+<img width="803" height="974" alt="Class_Diagram thyy" src="https://github.com/user-attachments/assets/69d23003-0669-41ad-abf0-35354460bd03" />
 
 ## VI. Data Model
