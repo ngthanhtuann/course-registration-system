@@ -1215,28 +1215,11 @@ None specified in the FR.
 
 ## VII. Interface Design Description
 
-### 1. General Interface
-
-**Actors:** Administrator, Lecturer, Student.  
-**Supported devices:** Desktop, Tablet, Mobile.
-
-Administrator • Lecturer • Student
-
-Desktop • Tablet • Mobile
-
 ### 1. Common Interfaces
 
 #### 1.1. Login Screen
-
 Actor: Administrator, Lecturer, Student.
-
 Purpose: Authenticate the user and redirect them to the correct role-based dashboard.
-
-#### Suggested layout
-
-- Desktop: centered login card with system name/logo at the top and a simple background.
-- Tablet: centered card with reduced width.
-- Mobile: full-width login panel with safe side margins and large tap targets.
 
 #### Main GUI components
 
@@ -1259,10 +1242,6 @@ Purpose: Authenticate the user and redirect them to the correct role-based dashb
 - Inactive account: show a clear account-status message.
 - After 5 consecutive failed attempts, show the temporary 15-minute blocking message.
 
-#### Responsive behavior
-
-- Desktop/tablet: card layout.
-- Mobile: card becomes nearly full width; Login button becomes full width.
 
 #### 1.2. Manage Account
 
@@ -1299,11 +1278,6 @@ Purpose: Allow the logged-in user to view personal account information, change p
 - Display error for invalid password input.
 - Logout ends the current session.
 
-#### Responsive behavior
-
-- Desktop: profile and password sections may be placed side-by-side.
-- Tablet/mobile: stack sections vertically.
-- Mobile buttons become full width.
 
 ### 2. Administrator Interfaces
 
@@ -1354,11 +1328,6 @@ Purpose: Create, view, search, edit, and deactivate Student and Lecturer account
 - Missing or invalid user information: prevent save.
 - If deactivation is cancelled, keep the account active.
 
-#### Responsive behavior
-
-- Desktop: full table.
-- Tablet: scroll horizontally if needed.
-- Mobile: each user becomes a card with ID, Name, Role, Status and action menu.
 
 #### 2.3. Manage Major
 
@@ -1392,10 +1361,6 @@ Purpose: Create, view, edit, and delete academic Majors.
 - Major referenced by Students/Curriculum: reject deletion.
 - Deletion cancelled: leave Major unchanged.
 
-#### Responsive behavior
-
-- Desktop/tablet: simple table.
-- Mobile: Major cards with Edit/Delete action menu.
 
 #### 2.4. Manage Curriculum
 
@@ -1429,12 +1394,6 @@ Purpose: Manage Courses belonging to a selected Major's Curriculum and set Recom
 - Course already in Curriculum: do not add again.
 - Invalid Recommended Semester: do not save.
 - Removal cancelled: keep Curriculum unchanged.
-
-#### Responsive behavior
-
-- Desktop: standard table.
-- Tablet: scroll table horizontally if necessary.
-- Mobile: each Course is a card showing Code, Name, Credit and Recommended Semester.
 
 #### 2.5. Manage Course
 
@@ -1471,11 +1430,6 @@ Purpose: Create, view, search, edit, delete Courses, and set Prerequisite.
 - Invalid Prerequisite or self-prerequisite: reject selection.
 - Deletion cancelled: keep Course unchanged.
 
-#### Responsive behavior
-
-- Desktop: table + modal.
-- Tablet: table can scroll horizontally.
-- Mobile: card list; Edit/Delete/Prerequisite actions grouped in overflow menu.
 
 #### 2.6. Manage Semester
 
@@ -1509,10 +1463,6 @@ Purpose: Create, view, edit, and delete academic Semesters.
 - Semester in use: prevent deletion.
 - Deletion cancelled: keep Semester unchanged.
 
-#### Responsive behavior
-
-- Desktop/tablet: table.
-- Mobile: semester cards with date range and status.
 
 #### 2.7. Manage Registration Period
 
@@ -1547,12 +1497,6 @@ Purpose: Configure the Registration Period for a selected Semester while the sys
 - Registration Period must fall within the selected Semester.
 - Status is never manually changed by Admin.
 
-#### Responsive behavior
-
-- Desktop: form can use two columns for Start/End fields.
-- Tablet/mobile: stack all fields vertically.
-- Status badge remains visible near the top.
-
 #### 2.8. Manage Registration Demand
 
 Actor: Administrator.
@@ -1585,12 +1529,6 @@ Purpose: View Course registration demand and the list of Students registered for
 
 - No Courses Found: display empty state.
 - No Students Registered: display empty state in Student list.
-
-#### Responsive behavior
-
-- Desktop: Course and Student tables may be stacked vertically.
-- Tablet: same stacked layout with scrollable tables.
-- Mobile: Course cards first; tapping a card opens Student cards.
 
 #### 2.9. Assign Lecturer
 
@@ -1625,10 +1563,6 @@ Purpose: Assign a qualified Lecturer to a Course.
 - If no qualified Lecturer is available, show an empty-state message.
 - Invalid assignment must not be saved.
 
-#### Responsive behavior
-
-- Desktop/tablet: table.
-- Mobile: lecturer cards with qualification and Assign button.
 
 ### 3. Lecturer Interfaces
 
@@ -1670,11 +1604,6 @@ Purpose: View Courses assigned by Administrator for a selected Semester.
 - No Courses Assigned: show empty state.
 - Lecturer cannot add, remove, request, or modify Teaching Assignment.
 
-#### Responsive behavior
-
-- Desktop/tablet: table.
-- Mobile: assigned Course cards with View Details.
-
 #### 3.3. Manage Student Grades
 
 Actor: Lecturer.
@@ -1715,11 +1644,6 @@ Purpose: Select an assigned Course, view registered Students, and enter or updat
 - Save failure: show error and keep existing Grade data unchanged.
 - Prerequisite Status is read-only.
 
-#### Responsive behavior
-
-- Desktop: Student table + side grade panel works well.
-- Tablet: grade panel may become modal.
-- Mobile: Student list becomes cards; tapping a Student opens a full-screen/bottom-sheet Grade form.
 
 ### 4. Student Interfaces
 
@@ -1762,10 +1686,6 @@ Purpose: View and search Courses belonging to the Student's Major and inspect Co
 - Course Not Found: show empty-state message.
 - Course data is read-only.
 
-#### Responsive behavior
-
-- Desktop/tablet: table.
-- Mobile: Course cards with Code, Name, Credit, Prerequisite and Recommended Semester.
 
 #### 4.3. Course Registration
 
@@ -1801,12 +1721,6 @@ Purpose: Register for an available Course during an open Registration Period.
 - Duplicate Registration: block registration.
 - If Student does not confirm, do not create Registration.
 
-#### Responsive behavior
-
-- Desktop: full Course table.
-- Tablet: scrollable table.
-- Mobile: Course registration cards with a full-width Register button.
-
 #### 4.4. View Registration Status
 
 Actor: Student.
@@ -1836,10 +1750,6 @@ Purpose: View registered/dropped Courses and Registration Period information for
 - No Registration Record: show clear empty-state message.
 - Statuses are read-only.
 
-#### Responsive behavior
-
-- Desktop/tablet: table.
-- Mobile: Registration Period card followed by Course status cards.
 
 #### 4.5. Drop Course
 
@@ -1872,10 +1782,6 @@ Purpose: Drop an actively registered Course when the Drop Period is open.
 - If Student cancels confirmation, keep Registration unchanged.
 - After success, show Dropped status.
 
-#### Responsive behavior
-
-- Desktop/tablet: table.
-- Mobile: Course cards with clearly visible Drop button or disabled state.
 
 #### 4.6. View Grades
 
@@ -1906,45 +1812,8 @@ Purpose: View Grade and Result Status for Courses in a selected Semester.
 - Grade Not Yet Entered: show Not Entered or an appropriate message.
 - Student can view only their own Grades.
 
-#### Responsive behavior
 
-- Desktop/tablet: table.
-- Mobile: grade cards showing Course, Grade and Result Status.
-
-### 5. Reusable Figma Components
-
-- Sidebar with expanded/collapsed/mobile variants.
-- Topbar.
-- Primary, Secondary, Danger and Disabled Button variants.
-- Text Input, Password Input, Date/Time Input.
-- Dropdown / Select.
-- Search Box.
-- Data Table.
-- Mobile Data Card.
-- Status Badge.
-- Form Card.
-- Modal Dialog.
-- Confirmation Dialog.
-- Empty State.
-- Loading State.
-- Pagination.
-
-### 6. Recommended Figma Page Structure
-
-| Figma Page | Contents |
-| --- | --- |
-| 01 - Design System | Colors, typography, buttons, inputs, tables, status badges, modal components |
-| 02 - Common | Login, Manage Account |
-| 03 - Administrator | Admin Dashboard and all Admin screens |
-| 04 - Lecturer | Lecturer Dashboard, Manage Teaching Course, Manage Student Grades |
-| 05 - Student | Student Dashboard and all Student screens |
-| 06 - Responsive Components | Desktop 1440, Tablet 768, Mobile 390 variants |
-
-### 7. Screen Count and Prototype Strategy
-
-The group does not need to draw every use case as a completely unique visual layout. Several functions share the same structure. Create a standard List + Table layout and a standard Create/Edit Form, then duplicate and adjust them. A practical complete prototype should contain approximately 12–15 main screens, with responsive Desktop, Tablet, and Mobile variants for the important screens.
-
-### 8. Final GUI Navigation
+### 5. Final GUI Navigation
 
 - Login → system identifies role → corresponding Dashboard.
 - Administrator → User / Major / Curriculum / Course / Semester / Registration Period / Registration Demand / Assign Lecturer.
