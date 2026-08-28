@@ -1217,6 +1217,22 @@ None specified in the FR.
 
 ### 1. Admin
 ### 2. Student
+<img width="928" height="846" alt="Screenshot 2026-08-23 220015" src="https://github.com/user-attachments/assets/15a2ac31-d85f-4579-8902-82db5dff824c" />
+<img width="1916" height="844" alt="Screenshot 2026-08-23 220106" src="https://github.com/user-attachments/assets/d6056093-c8bf-4c37-9ca6-a46731422b98" />
+<img width="1919" height="847" alt="Screenshot 2026-08-23 220116" src="https://github.com/user-attachments/assets/2b4b8dd4-0a50-4a9a-ae1e-4d424b97b2b8" />
+<img width="1919" height="840" alt="Screenshot 2026-08-23 220132" src="https://github.com/user-attachments/assets/29a0c0c5-1894-452a-b5a8-f890883ad1a7" />
+<img width="1919" height="845" alt="Screenshot 2026-08-23 220156" src="https://github.com/user-attachments/assets/50066f46-39fc-4b10-bcc7-69fe72bc60e2" />
+<img width="1919" height="844" alt="Screenshot 2026-08-23 220202" src="https://github.com/user-attachments/assets/b3cb20ce-4535-447d-962a-a79b03c4d60e" />
+<img width="1919" height="842" alt="Screenshot 2026-08-23 220214" src="https://github.com/user-attachments/assets/a6d23f20-51a0-48f7-b07c-3c837b63c5e8" />
+<img width="1919" height="914" alt="Screenshot 2026-08-23 220222" src="https://github.com/user-attachments/assets/67b20618-31b6-4292-9e67-ca1e4ca18ee8" />
+<img width="1919" height="910" alt="Screenshot 2026-08-23 220228" src="https://github.com/user-attachments/assets/993faec2-5cc9-416d-b95e-b1ef6adb5d7a" />
+<img width="1919" height="842" alt="Screenshot 2026-08-23 220246" src="https://github.com/user-attachments/assets/93fe0c1e-0d0a-440c-b62f-f6050a2a733e" />
+<img width="1919" height="910" alt="Screenshot 2026-08-23 220301" src="https://github.com/user-attachments/assets/7f5d847f-60d7-49e5-9c60-82f1c540df5a" />
+<img width="1919" height="842" alt="Screenshot 2026-08-23 220309" src="https://github.com/user-attachments/assets/45e243d1-22f3-4ee4-a77e-9020283a297d" />
+
+
+
+
 ### 3. Lect
 
 
