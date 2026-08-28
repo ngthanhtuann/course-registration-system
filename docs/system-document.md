@@ -997,6 +997,17 @@ None specified in the FR.
 
 
 ### 3. Lect
+<img width="945" height="451" alt="image" src="https://github.com/user-attachments/assets/97442a82-eda7-476f-8a6a-21cdf961802c" />
+<img width="945" height="450" alt="image" src="https://github.com/user-attachments/assets/b40e89f2-c276-4560-b922-c4d1c4adcfd3" />
+<img width="945" height="452" alt="image" src="https://github.com/user-attachments/assets/adb799f9-37da-4f35-abe7-991d9aca3b5b" />
+<img width="945" height="449" alt="image" src="https://github.com/user-attachments/assets/28bfb1dd-14db-4f61-8102-f05216e10ba6" />
+<img width="945" height="448" alt="image" src="https://github.com/user-attachments/assets/f7cc5fa5-4eb9-4660-88e9-082e126ae262" />
+
+
+
+
+
+
 
 
 
