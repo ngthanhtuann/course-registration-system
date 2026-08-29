@@ -979,6 +979,19 @@ None specified in the FR.
 ## VII. Interface Design Description
 
 ### 1. Admin
+<img width="1512" height="982" alt="Screenshot 2026-08-29 at 13 18 51" src="https://github.com/user-attachments/assets/597f420b-9c4c-41e6-ac68-f8fcc215d88d" />
+<img width="1512" height="982" alt="Screenshot 2026-08-29 at 13 19 28" src="https://github.com/user-attachments/assets/9995314b-825f-40af-bd51-17703ccbfb70" />
+<img width="1512" height="982" alt="Screenshot 2026-08-29 at 13 20 05" src="https://github.com/user-attachments/assets/e9595fdd-16fd-465e-b821-d40cde802f55" />
+<img width="1512" height="982" alt="Screenshot 2026-08-29 at 13 20 19" src="https://github.com/user-attachments/assets/25051474-b171-459e-9698-a07ae4171475" />
+<img width="1512" height="982" alt="Screenshot 2026-08-29 at 13 20 48" src="https://github.com/user-attachments/assets/38bf8860-46ba-4dd6-86d3-b72c34cfd8e7" />
+<img width="1512" height="982" alt="Screenshot 2026-08-29 at 13 21 45" src="https://github.com/user-attachments/assets/397a5bac-97f0-4934-be5d-04fe41b8a843" />
+<img width="1512" height="982" alt="Screenshot 2026-08-29 at 13 21 55" src="https://github.com/user-attachments/assets/1111bf5e-3dc0-4ff7-91d9-dcc350857e19" />
+<img width="1512" height="982" alt="Screenshot 2026-08-29 at 13 22 02" src="https://github.com/user-attachments/assets/5cf04678-f62d-4ad3-9dd5-1a21933f4b55" />
+<img width="1512" height="982" alt="Screenshot 2026-08-29 at 13 22 30" src="https://github.com/user-attachments/assets/3d51d216-7acc-4562-9883-f5e140f8cc76" />
+<img width="1512" height="982" alt="Screenshot 2026-08-29 at 13 23 05" src="https://github.com/user-attachments/assets/f92ac0cd-e331-4146-a3d1-094a0dd9c915" />
+<img width="1512" height="982" alt="Screenshot 2026-08-29 at 13 23 17" src="https://github.com/user-attachments/assets/08f01122-7281-48b2-acb5-0b7421ee4d53" />
+<img width="1512" height="982" alt="Screenshot 2026-08-29 at 13 23 24" src="https://github.com/user-attachments/assets/a4f5bd0c-209c-4c01-8b7e-d3c3217edc76" />
+
 ### 2. Student
 <img width="928" height="846" alt="Screenshot 2026-08-23 220015" src="https://github.com/user-attachments/assets/15a2ac31-d85f-4579-8902-82db5dff824c" />
 <img width="1916" height="844" alt="Screenshot 2026-08-23 220106" src="https://github.com/user-attachments/assets/d6056093-c8bf-4c37-9ca6-a46731422b98" />
