@@ -997,11 +997,15 @@ None specified in the FR.
 
 
 ### 3. Lect
-<img width="945" height="451" alt="image" src="https://github.com/user-attachments/assets/97442a82-eda7-476f-8a6a-21cdf961802c" />
-<img width="945" height="450" alt="image" src="https://github.com/user-attachments/assets/b40e89f2-c276-4560-b922-c4d1c4adcfd3" />
-<img width="945" height="452" alt="image" src="https://github.com/user-attachments/assets/adb799f9-37da-4f35-abe7-991d9aca3b5b" />
-<img width="945" height="449" alt="image" src="https://github.com/user-attachments/assets/28bfb1dd-14db-4f61-8102-f05216e10ba6" />
-<img width="945" height="448" alt="image" src="https://github.com/user-attachments/assets/f7cc5fa5-4eb9-4660-88e9-082e126ae262" />
+<img width="1920" height="910" alt="image" src="https://github.com/user-attachments/assets/1693840e-4ce3-47d6-b6b3-3b83aa098e39" />
+<img width="1920" height="914" alt="image" src="https://github.com/user-attachments/assets/925f8ca2-2757-4498-8ad9-8f26a6557f0f" />
+<img width="1920" height="913" alt="image" src="https://github.com/user-attachments/assets/4e4ecd7b-b3ed-40c8-8668-945dff5194cd" />
+<img width="1920" height="913" alt="image" src="https://github.com/user-attachments/assets/c0f56f78-532c-4e2e-b0ef-167429c33591" />
+<img width="1920" height="910" alt="image" src="https://github.com/user-attachments/assets/fcfdb4d0-0801-4f13-9c57-d64f31ea3557" />
+<img width="1920" height="911" alt="image" src="https://github.com/user-attachments/assets/490741b2-fd06-4842-91e0-602d53040903" />
+
+
+
 
 
 
