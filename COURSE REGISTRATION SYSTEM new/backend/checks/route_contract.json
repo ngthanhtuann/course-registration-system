@@ -1,0 +1,460 @@
+[
+  {
+    "module": "auth",
+    "name": "login",
+    "decorators": [
+      "auth_bp.post('/login')"
+    ],
+    "args": ""
+  },
+  {
+    "module": "auth",
+    "name": "me",
+    "decorators": [
+      "auth_bp.get('/me')",
+      "require_auth()"
+    ],
+    "args": ""
+  },
+  {
+    "module": "auth",
+    "name": "update_profile",
+    "decorators": [
+      "auth_bp.put('/account/profile')",
+      "require_auth()"
+    ],
+    "args": ""
+  },
+  {
+    "module": "auth",
+    "name": "change_password",
+    "decorators": [
+      "auth_bp.put('/account/password')",
+      "require_auth()"
+    ],
+    "args": ""
+  },
+  {
+    "module": "student",
+    "name": "profile",
+    "decorators": [
+      "student_bp.get('/profile')",
+      "require_auth('student')"
+    ],
+    "args": ""
+  },
+  {
+    "module": "student",
+    "name": "semesters",
+    "decorators": [
+      "student_bp.get('/semesters')",
+      "require_auth('student')"
+    ],
+    "args": ""
+  },
+  {
+    "module": "student",
+    "name": "registration_periods",
+    "decorators": [
+      "student_bp.get('/registration-periods')",
+      "require_auth('student')"
+    ],
+    "args": ""
+  },
+  {
+    "module": "student",
+    "name": "curriculum",
+    "decorators": [
+      "student_bp.get('/curriculum')",
+      "require_auth('student')"
+    ],
+    "args": ""
+  },
+  {
+    "module": "student",
+    "name": "courses",
+    "decorators": [
+      "student_bp.get('/courses')",
+      "require_auth('student')"
+    ],
+    "args": ""
+  },
+  {
+    "module": "student",
+    "name": "register_course",
+    "decorators": [
+      "student_bp.post('/registrations')",
+      "require_auth('student')"
+    ],
+    "args": ""
+  },
+  {
+    "module": "student",
+    "name": "registrations",
+    "decorators": [
+      "student_bp.get('/registrations')",
+      "require_auth('student')"
+    ],
+    "args": ""
+  },
+  {
+    "module": "student",
+    "name": "drop_course",
+    "decorators": [
+      "student_bp.put('/registrations/<registration_id>/drop')",
+      "require_auth('student')"
+    ],
+    "args": "registration_id"
+  },
+  {
+    "module": "student",
+    "name": "grades",
+    "decorators": [
+      "student_bp.get('/grades')",
+      "require_auth('student')"
+    ],
+    "args": ""
+  },
+  {
+    "module": "lecturer",
+    "name": "profile",
+    "decorators": [
+      "lecturer_bp.get('/profile')",
+      "require_auth('lecturer')"
+    ],
+    "args": ""
+  },
+  {
+    "module": "lecturer",
+    "name": "semesters",
+    "decorators": [
+      "lecturer_bp.get('/semesters')",
+      "require_auth('lecturer')"
+    ],
+    "args": ""
+  },
+  {
+    "module": "lecturer",
+    "name": "teaching_courses",
+    "decorators": [
+      "lecturer_bp.get('/teaching-courses')",
+      "require_auth('lecturer')"
+    ],
+    "args": ""
+  },
+  {
+    "module": "lecturer",
+    "name": "course_students",
+    "decorators": [
+      "lecturer_bp.get('/courses/<course_code>/students')",
+      "require_auth('lecturer')"
+    ],
+    "args": "course_code"
+  },
+  {
+    "module": "lecturer",
+    "name": "update_grade",
+    "decorators": [
+      "lecturer_bp.put('/registrations/<registration_id>/grade')",
+      "require_auth('lecturer')"
+    ],
+    "args": "registration_id"
+  },
+  {
+    "module": "admin",
+    "name": "dashboard",
+    "decorators": [
+      "admin_bp.get('/dashboard')",
+      "require_auth('admin')"
+    ],
+    "args": ""
+  },
+  {
+    "module": "admin",
+    "name": "list_users",
+    "decorators": [
+      "admin_bp.get('/users')",
+      "require_auth('admin')"
+    ],
+    "args": ""
+  },
+  {
+    "module": "admin",
+    "name": "create_user",
+    "decorators": [
+      "admin_bp.post('/users')",
+      "require_auth('admin')"
+    ],
+    "args": ""
+  },
+  {
+    "module": "admin",
+    "name": "update_user",
+    "decorators": [
+      "admin_bp.put('/users/<user_id>')",
+      "require_auth('admin')"
+    ],
+    "args": "user_id"
+  },
+  {
+    "module": "admin",
+    "name": "deactivate_user",
+    "decorators": [
+      "admin_bp.delete('/users/<user_id>')",
+      "require_auth('admin')"
+    ],
+    "args": "user_id"
+  },
+  {
+    "module": "admin",
+    "name": "list_majors",
+    "decorators": [
+      "admin_bp.get('/majors')",
+      "require_auth('admin')"
+    ],
+    "args": ""
+  },
+  {
+    "module": "admin",
+    "name": "create_major",
+    "decorators": [
+      "admin_bp.post('/majors')",
+      "require_auth('admin')"
+    ],
+    "args": ""
+  },
+  {
+    "module": "admin",
+    "name": "update_major",
+    "decorators": [
+      "admin_bp.put('/majors/<major_code>')",
+      "require_auth('admin')"
+    ],
+    "args": "major_code"
+  },
+  {
+    "module": "admin",
+    "name": "delete_major",
+    "decorators": [
+      "admin_bp.delete('/majors/<major_code>')",
+      "require_auth('admin')"
+    ],
+    "args": "major_code"
+  },
+  {
+    "module": "admin",
+    "name": "list_courses",
+    "decorators": [
+      "admin_bp.get('/courses')",
+      "require_auth('admin')"
+    ],
+    "args": ""
+  },
+  {
+    "module": "admin",
+    "name": "create_course",
+    "decorators": [
+      "admin_bp.post('/courses')",
+      "require_auth('admin')"
+    ],
+    "args": ""
+  },
+  {
+    "module": "admin",
+    "name": "update_course",
+    "decorators": [
+      "admin_bp.put('/courses/<course_code>')",
+      "require_auth('admin')"
+    ],
+    "args": "course_code"
+  },
+  {
+    "module": "admin",
+    "name": "delete_course",
+    "decorators": [
+      "admin_bp.delete('/courses/<course_code>')",
+      "require_auth('admin')"
+    ],
+    "args": "course_code"
+  },
+  {
+    "module": "admin",
+    "name": "get_curriculum",
+    "decorators": [
+      "admin_bp.get('/curriculum/<major_code>')",
+      "require_auth('admin')"
+    ],
+    "args": "major_code"
+  },
+  {
+    "module": "admin",
+    "name": "add_curriculum",
+    "decorators": [
+      "admin_bp.post('/curriculum')",
+      "require_auth('admin')"
+    ],
+    "args": ""
+  },
+  {
+    "module": "admin",
+    "name": "update_curriculum",
+    "decorators": [
+      "admin_bp.put('/curriculum/<curriculum_id>')",
+      "require_auth('admin')"
+    ],
+    "args": "curriculum_id"
+  },
+  {
+    "module": "admin",
+    "name": "remove_curriculum",
+    "decorators": [
+      "admin_bp.delete('/curriculum/<curriculum_id>')",
+      "require_auth('admin')"
+    ],
+    "args": "curriculum_id"
+  },
+  {
+    "module": "admin",
+    "name": "list_semesters",
+    "decorators": [
+      "admin_bp.get('/semesters')",
+      "require_auth('admin')"
+    ],
+    "args": ""
+  },
+  {
+    "module": "admin",
+    "name": "create_semester",
+    "decorators": [
+      "admin_bp.post('/semesters')",
+      "require_auth('admin')"
+    ],
+    "args": ""
+  },
+  {
+    "module": "admin",
+    "name": "update_semester",
+    "decorators": [
+      "admin_bp.put('/semesters/<semester_id>')",
+      "require_auth('admin')"
+    ],
+    "args": "semester_id"
+  },
+  {
+    "module": "admin",
+    "name": "delete_semester",
+    "decorators": [
+      "admin_bp.delete('/semesters/<semester_id>')",
+      "require_auth('admin')"
+    ],
+    "args": "semester_id"
+  },
+  {
+    "module": "admin",
+    "name": "list_periods",
+    "decorators": [
+      "admin_bp.get('/registration-periods')",
+      "require_auth('admin')"
+    ],
+    "args": ""
+  },
+  {
+    "module": "admin",
+    "name": "create_period",
+    "decorators": [
+      "admin_bp.post('/registration-periods')",
+      "require_auth('admin')"
+    ],
+    "args": ""
+  },
+  {
+    "module": "admin",
+    "name": "update_period",
+    "decorators": [
+      "admin_bp.put('/registration-periods/<period_id>')",
+      "require_auth('admin')"
+    ],
+    "args": "period_id"
+  },
+  {
+    "module": "admin",
+    "name": "delete_period",
+    "decorators": [
+      "admin_bp.delete('/registration-periods/<period_id>')",
+      "require_auth('admin')"
+    ],
+    "args": "period_id"
+  },
+  {
+    "module": "admin",
+    "name": "registration_demand",
+    "decorators": [
+      "admin_bp.get('/registration-demand')",
+      "require_auth('admin')"
+    ],
+    "args": ""
+  },
+  {
+    "module": "admin",
+    "name": "demand_students",
+    "decorators": [
+      "admin_bp.get('/registration-demand/<course_code>/students')",
+      "require_auth('admin')"
+    ],
+    "args": "course_code"
+  },
+  {
+    "module": "admin",
+    "name": "list_assignments",
+    "decorators": [
+      "admin_bp.get('/teaching-assignments')",
+      "require_auth('admin')"
+    ],
+    "args": ""
+  },
+  {
+    "module": "admin",
+    "name": "delete_assignment",
+    "decorators": [
+      "admin_bp.delete('/teaching-assignments/<assignment_id>')",
+      "require_auth('admin')"
+    ],
+    "args": "assignment_id"
+  },
+  {
+    "module": "admin",
+    "name": "qualified_lecturers",
+    "decorators": [
+      "admin_bp.get('/qualified-lecturers/<course_code>')",
+      "require_auth('admin')"
+    ],
+    "args": "course_code"
+  },
+  {
+    "module": "admin",
+    "name": "add_qualification",
+    "decorators": [
+      "admin_bp.post('/lecturer-qualifications')",
+      "require_auth('admin')"
+    ],
+    "args": ""
+  },
+  {
+    "module": "admin",
+    "name": "remove_qualification",
+    "decorators": [
+      "admin_bp.delete('/lecturer-qualifications/<lecturer_id>/<course_code>')",
+      "require_auth('admin')"
+    ],
+    "args": "lecturer_id, course_code"
+  },
+  {
+    "module": "admin",
+    "name": "assign_lecturer",
+    "decorators": [
+      "admin_bp.post('/teaching-assignments')",
+      "require_auth('admin')"
+    ],
+    "args": ""
+  }
+]
