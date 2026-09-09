@@ -175,7 +175,7 @@ Then open the Vite URL shown in Terminal 2.
 
 ## 6. Authentication
 
-The frontend no longer uses the old demo login data from `data.ts`.
+The frontend loads application data through `src/api.ts`; there is no local demo data store.
 
 Login flow:
 
@@ -439,7 +439,7 @@ Grades
 ## 12. Development notes
 
 - The original React page/file structure is retained.
-- `data.ts` remains as the original data-model file, but application pages now read/write through the Flask API instead of using its old demo data.
+- Application pages read/write through the Flask API; unused local data/context scaffolding has been removed.
 - The backend remains split by role/function: `auth.py`, `admin.py`, `lecturer.py`, `student.py`, and `database.py`.
 - PostgreSQL remains the single source of truth for application data.
 - Lecturer qualification is a real database relationship, not a frontend-only field.
@@ -477,3 +477,14 @@ pass `--legacy-dump PATH` with a schema-only `pg_dump --no-owner --no-privileges
 
 From the frontend directory, `npm run build` now runs TypeScript checking before
 Vite. `npm run typecheck` checks types without producing build files.
+
+
+## Repository organization
+
+- `backend/`: HTTP routes, domain classes, database adapter, checks and migrations.
+- `frontend/src/`: application, pages, shared components, API client and types.
+- Local virtual environments and `node_modules` are intentionally preserved on disk and ignored.
+
+The frontend uses same-origin `/api` requests by default. Vite development/preview
+proxies them to `http://127.0.0.1:5000`. This preserves single-port tunnel sharing.
+An explicit `VITE_API_URL` can override the default.
