@@ -1,0 +1,3 @@
+-- Optional seed-data entry point.
+-- The production schema intentionally starts empty. Add only disposable local
+-- test records here; do not run this file against a database containing users.
