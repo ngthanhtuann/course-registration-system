@@ -41,3 +41,4 @@ logs/
 # Local recovery archives (not application source)
 archives/
 *.backup
+.neon
