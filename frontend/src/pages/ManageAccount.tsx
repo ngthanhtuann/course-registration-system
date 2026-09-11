@@ -35,6 +35,11 @@ export default function ManageAccount({ user, onLogout }: Props) {
       setError("Full name and email are required.")
       return
     }
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailPattern.test(email.trim())) {
+      setError("Invalid email format.")
+      return
+    }
     setLoading(true)
     try {
       await api.updateProfile(fullname.trim(), email.trim())

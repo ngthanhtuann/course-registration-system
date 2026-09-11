@@ -11,9 +11,12 @@ import {
 } from "../../components/ui"
 import type { Column } from "../../components/ui"
 import { api } from "../../services/api"
+import { useAdminList } from "../../services/useAdminList"
 export default function AssignLecturer() {
-  const [semesters, setSemesters] = useState<any[]>([])
-  const [courses, setCourses] = useState<any[]>([])
+  const semesterList = useAdminList("semesters")
+  const courseList = useAdminList("courses")
+  const semesters = semesterList.data
+  const courses = courseList.data
   const [assignments, setAssignments] = useState<any[]>([])
   const [semester, setSemester] = useState("")
   const [course, setCourse] = useState("")
@@ -22,14 +25,12 @@ export default function AssignLecturer() {
   const [err, setErr] = useState("")
   const [msg, setMsg] = useState("")
   useEffect(() => {
-    Promise.all([api.admin.semesters(), api.admin.courses()])
-      .then(([s, c]) => {
-        setSemesters(s)
-        setCourses(c)
-        if (s[0]) setSemester(s[0].semester_id)
-      })
-      .catch((e) => setErr(e.message))
-  }, [])
+    // C? h?c k? l? t?i ph?n c?ng ngay, kh?ng c?n ch? danh s?ch m?n h?c.
+    // Refresh n?n kh?ng ???c ??i h?c k? ng??i d?ng ?ang ch?n.
+    if (semesters[0]) {
+      setSemester((current) => current || semesters[0].semester_id)
+    }
+  }, [semesters])
   useEffect(() => {
     if (!semester) return
     api.admin
@@ -135,9 +136,9 @@ export default function AssignLecturer() {
           <Alert type="success" message={msg} />
         </div>
       )}
-      {err && (
+      {(err || semesterList.error || courseList.error) && (
         <div className="mb-3">
-          <Alert type="error" message={err} />
+          <Alert type="error" message={err || semesterList.error || courseList.error} />
         </div>
       )}
       <Card className="p-4 mb-5">

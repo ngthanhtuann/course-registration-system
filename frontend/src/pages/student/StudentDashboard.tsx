@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Card, StatCard, SectionHeader, Badge } from "../../components/ui"
 import { api } from "../../services/api"
+import { prefetchPage } from "../../services/pagePrefetch"
 import type { Student } from "../../types"
 export default function StudentDashboard({ user }: { user: Student }) {
   const nav = useNavigate()
@@ -9,6 +10,8 @@ export default function StudentDashboard({ user }: { user: Student }) {
   const [periods, setPeriods] = useState<any[]>([])
   const [curr, setCurr] = useState<any[]>([])
   useEffect(() => {
+    // Shared by Registration Status and View Grades; no registration rules cached.
+    void api.student.semesters().catch(() => {})
     Promise.all([
       api.student.registrations(),
       api.student.periods(),
@@ -73,6 +76,9 @@ export default function StudentDashboard({ user }: { user: Student }) {
           <button
             key={p}
             onClick={() => nav(p)}
+            onMouseEnter={() => prefetchPage(p)}
+            onFocus={() => prefetchPage(p)}
+            onTouchStart={() => prefetchPage(p)}
             className="p-4 bg-white border rounded-xl text-left hover:border-blue-300"
           >
             <span className="text-sm font-medium text-slate-700">{x}</span>

@@ -1,5 +1,7 @@
 """Functions shared by all users."""
 
+import re
+
 from database import get_db
 from utils.password import hash_password, check_password, make_token
 
@@ -80,8 +82,18 @@ class User:
 
         data = data or {}
 
-        username = data.get("username", "").strip()
-        password = data.get("password", "")
+        username_value = data.get("username")
+        password_value = data.get("password")
+
+        # Reject malformed JSON values before they reach SQL or bcrypt.
+        if not isinstance(username_value, str) or not isinstance(password_value, str):
+            return (
+                {"error": "invalid username or password input"},
+                400,
+            )
+
+        username = username_value.strip()
+        password = password_value
 
         if not username or not password:
             return (
@@ -169,17 +181,27 @@ class User:
 
         data = data or {}
 
-        fullname = (
-            data.get("fullname")
-            or data.get("full_name")
-            or ""
-        ).strip()
+        fullname_value = data.get("fullname") or data.get("full_name")
+        email_value = data.get("email")
 
-        email = (data.get("email") or "").strip()
+        if not isinstance(fullname_value, str) or not isinstance(email_value, str):
+            return (
+                {"error": "fullname and email are required"},
+                400,
+            )
+
+        fullname = fullname_value.strip()
+        email = email_value.strip()
 
         if not fullname or not email:
             return (
                 {"error": "fullname and email are required"},
+                400,
+            )
+
+        if not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email):
+            return (
+                {"error": "Invalid email format"},
                 400,
             )
 

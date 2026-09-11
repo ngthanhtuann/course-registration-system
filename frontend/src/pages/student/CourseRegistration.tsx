@@ -27,7 +27,7 @@ export default function CourseRegistration({ user }: Props) {
       setPeriods(p)
       const open = p.find((x) => x.current_status === "open")
       setPeriod(open || p[0] || null)
-      if (open) setRows(await api.student.courses(open.period_id))
+      // The period effect below loads courses once after the selection changes.
     } catch (e: any) {
       setErr(e.message)
     }

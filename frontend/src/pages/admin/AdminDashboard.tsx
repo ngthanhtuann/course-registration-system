@@ -2,11 +2,14 @@ import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Card, StatCard, SectionHeader } from "../../components/ui"
 import { api } from "../../services/api"
+import { prefetchAdminLists } from "../../services/useAdminList"
+import { prefetchPage } from "../../services/pagePrefetch"
 export default function AdminDashboard() {
   const nav = useNavigate()
   const [d, setD] = useState<any>({})
   const [error, setError] = useState("")
   useEffect(() => {
+    prefetchAdminLists()
     api.admin
       .dashboard()
       .then(setD)
@@ -62,6 +65,9 @@ export default function AdminDashboard() {
           <button
             key={path}
             onClick={() => nav(path)}
+            onMouseEnter={() => prefetchPage(path)}
+            onFocus={() => prefetchPage(path)}
+            onTouchStart={() => prefetchPage(path)}
             className="flex items-center gap-3 p-4 bg-white rounded-xl border border-slate-200 hover:border-blue-300 hover:shadow-sm text-left"
           >
             <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-lg">
