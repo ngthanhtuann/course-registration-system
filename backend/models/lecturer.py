@@ -156,12 +156,14 @@ class Lecturer(User):
                     return ({"error": "registration period has not ended"}, 400)
             grade_record = GradeRecord(grade)
             result_status = grade_record.calculateResultStatus()
+            grade = grade_record.grade
             db.execute_query(
                 "update registrations set grade=%s, result_status=%s where registration_id=%s",
                 (grade, result_status, registration_id),
             )
             return {
                 "message": "grade saved successfully",
+                "grade": grade,
                 "result_status": result_status,
             }
         finally:

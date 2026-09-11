@@ -50,21 +50,27 @@ export default function ManageStudentGrades({
         .catch((e) => setErr(e.message))
   }, [semester, course])
   const save = async (r: any) => {
+    setMsg("")
+    setErr("")
+    if (r._grade == null || String(r._grade).trim() === "") {
+      setErr("Grade is required.")
+      return
+    }
     const value = Number(r._grade)
     if (!Number.isFinite(value) || value < 0 || value > 10) {
       setErr("Grade must be between 0 and 10.")
       return
     }
     try {
-      await api.lecturer.updateGrade(r.registration_id, value)
+      const saved = await api.lecturer.updateGrade(r.registration_id, value)
       setMsg("Grade saved successfully.")
       setRows((prev) =>
         prev.map((x) =>
           x.registration_id === r.registration_id
             ? {
                 ...x,
-                grade: value,
-                result_status: value >= 5 ? "passed" : "not passed",
+                grade: saved.grade,
+                result_status: saved.result_status,
                 _grade: "",
               }
             : x,

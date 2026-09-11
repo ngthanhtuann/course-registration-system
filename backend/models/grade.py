@@ -1,6 +1,7 @@
 """Grade model."""
 
 from math import isfinite
+from decimal import Decimal, ROUND_HALF_UP
 
 
 class GradeRecord:
@@ -18,6 +19,10 @@ class GradeRecord:
         else:
             if not isfinite(self.grade) or not 0 <= self.grade <= 10:
                 raise ValueError("grade must be between 0 and 10")
+            # Match PostgreSQL numeric(4,2) before deriving the result.
+            self.grade = float(Decimal(str(self.grade)).quantize(
+                Decimal("0.01"), rounding=ROUND_HALF_UP
+            ))
             if self.grade >= 5:
                 self.resultStatus = "passed"
             else:

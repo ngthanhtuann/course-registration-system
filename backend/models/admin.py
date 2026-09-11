@@ -358,7 +358,7 @@ class Administrator(User):
             return ({"error": "Major name is required"}, 400)
         db = get_db()
         try:
-            db.execute_query(
+            affected = db.execute_query(
                 """
             update majors
             set major_name = %s
@@ -366,6 +366,8 @@ class Administrator(User):
         """,
                 (major_name, major_code),
             )
+            if affected == 0:
+                return ({"error": "Major not found"}, 404)
             return {"message": "Major updated successfully"}
         finally:
             db.close()
@@ -374,13 +376,15 @@ class Administrator(User):
         """Delete a major."""
         db = get_db()
         try:
-            db.execute_query(
+            affected = db.execute_query(
                 """
             delete from majors
             where major_code = %s
         """,
                 (major_code,),
             )
+            if affected == 0:
+                return ({"error": "Major not found"}, 404)
             return {"message": "Major deleted successfully"}
         except Exception:
             db.conn.rollback()
