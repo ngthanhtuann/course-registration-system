@@ -1,83 +1,156 @@
 # Course Registration System
 
-The Course Registration System consists of a React + TypeScript + Vite frontend, a Flask backend, and PostgreSQL.
+A simple course registration web system with three roles: **Administrator, Lecturer, and Student**.
 
-## Structure
+The project uses:
+
+- **Frontend:** React + TypeScript + Vite + Tailwind CSS
+- **Backend:** Python Flask
+- **Database:** PostgreSQL (the project can use Neon PostgreSQL cloud)
+- **Authentication:** JWT
+
+## 1. How the system works
 
 ```text
-Course_Registration_System/
-â”œâ”€â”€ backend/
-â”‚   â”œâ”€â”€ app.py                 # Flask entry point
-â”‚   â”œâ”€â”€ config.py
-â”‚   â”œâ”€â”€ database.py
-â”‚   â”œâ”€â”€ create_admin.py
-â”‚   â”œâ”€â”€ models/                # Domain models
-â”‚   â”œâ”€â”€ services/              # Business-service boundary
-â”‚   â”œâ”€â”€ routes/                # Flask API blueprints
-â”‚   â”œâ”€â”€ utils/                 # Auth, password, HTTP helpers
-â”‚   â”œâ”€â”€ migrations/            # Legacy-database migrations
-â”‚   â”œâ”€â”€ checks/                # Static and integration checks
-â”‚   â””â”€â”€ requirements.txt
-â”œâ”€â”€ frontend/
-â”‚   â”œâ”€â”€ src/
-â”‚   â”‚   â”œâ”€â”€ services/api.ts
-â”‚   â”‚   â”œâ”€â”€ components/
-â”‚   â”‚   â”œâ”€â”€ context/
-â”‚   â”‚   â””â”€â”€ pages/
-â”‚   â”œâ”€â”€ package.json
-â”‚   â””â”€â”€ vite.config.ts
-â”œâ”€â”€ database/
-â”‚   â”œâ”€â”€ schema.sql             # Fresh PostgreSQL schema
-â”‚   â””â”€â”€ sample_data.sql        # Optional local seed entry point
-â”œâ”€â”€ tests/unit/
-â”œâ”€â”€ docs/
-â””â”€â”€ README.md
+User
+  |
+  v
+React Frontend
+  |
+  | HTTP / JSON
+  v
+Flask Routes
+  |
+  v
+Models (system logic)
+  |
+  v
+database.py
+  |
+  v
+PostgreSQL / Neon
 ```
 
-## Requirements
+The frontend shows the user interface.  
+The Flask routes receive requests from the frontend.  
+The model classes contain the main system logic.  
+`database.py` connects the backend to PostgreSQL.
 
-- Python 3.10+ (recommended 3.11+)
-- Node.js 20+
-- PostgreSQL 14+
+## 2. Main functions
+
+### Administrator
+
+- Log in and manage account information.
+- View dashboard statistics.
+- Create, edit, deactivate and view Student/Lecturer accounts.
+- Manage majors.
+- Manage courses and prerequisites.
+- Manage curriculum.
+- Manage semesters.
+- Manage registration periods.
+- View registration demand and registered students.
+- Set lecturer qualifications.
+- Assign qualified lecturers to courses.
+
+### Lecturer
+
+- Log in and manage account information.
+- View lecturer profile.
+- View semesters and assigned teaching courses.
+- View students registered in a teaching course.
+- Enter and update student grades.
+
+### Student
+
+- Log in and manage account information.
+- View profile and curriculum.
+- View semesters and registration periods.
+- Search/view available courses.
+- Register for a course.
+- View registration status.
+- Drop a registered course during the allowed period.
+- View grades.
+
+## 3. Project structure
+
+```text
+Course Registration System/
+├── backend/
+│   ├── main.py
+│   ├── config.py
+│   ├── database.py
+│   ├── setup_database.py
+│   ├── create_admin.py
+│   ├── requirements.txt
+│   ├── models/
+│   ├── routes/
+│   └── utils/
+├── database/
+│   └── schema.sql
+├── frontend/
+│   ├── src/
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── tsconfig.json
+│   ├── vite.config.ts
+│   └── index.html
+├── tests/
+│   └── unit/
+├── docs/
+├── .gitignore
+└── README.md
+```
+
+`node_modules`, `.env`, `.DS_Store`, Python cache files and other local/generated files are not included in the project source. They are created locally when needed.
+
+## 4. Requirements
+
+Install these tools first:
+
+- Python 3.10 or newer
+- Node.js 20 or newer
 - npm
+- A PostgreSQL database
 
-## Database setup
+The group can use one shared Neon PostgreSQL database. In that case, every member connects their local Flask backend to the same database.
 
-1. Start PostgreSQL and create the database `course_registration_system`.
-2. Run the entire contents of [`database/schema.sql`](database/schema.sql) on an empty database using DBeaver or `psql`:
+## 5. Clone the project
 
-   ```bash
-   psql -U postgres -d course_registration_system -f database/schema.sql
-   ```
+Clone the repository:
 
-3. Create `backend/.env` with the connection configuration. Do not commit this file.
+```bash
+git clone <repository-url>
+```
 
-   ```env
-   db_host=localhost
-   db_port=5432
-   db_name=course_registration_system
-   db_user=postgres
-   db_password=YOUR_POSTGRES_PASSWORD
-   JWT_SECRET=REPLACE_WITH_A_RANDOM_SECRET_OF_AT_LEAST_32_CHARACTERS
-   ```
+Move into the project folder:
 
-The fresh schema uses canonical columns directly. Do not run legacy migrations on a database newly created from `database/schema.sql`.
+```bash
+cd course-registration-system
+```
 
-### Legacy database
+All commands below should be run from the project root unless another folder is specified.
 
-Back up the database first. Only if the database was created using the old schema should you run the files in `backend/migrations/` in order. Do not rerun an already applied migration. Migration 005 removes duplicate compatibility fields after checking that their data agrees; it stops if legacy grade records need a separate data migration. Run `python backend/checks/schema_check.py` after migration to verify the database contract.
-
-## Backend setup
-
-Run from the project root directory.
+## 6. Backend setup
 
 ### macOS / Linux
+
+Create a Python virtual environment:
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install --upgrade pip
+```
+
+Install backend packages:
+
+```bash
 python -m pip install -r backend/requirements.txt
+```
+
+Create the local environment file:
+
+```bash
+cp backend/.env.example backend/.env
 ```
 
 ### Windows PowerShell
@@ -85,46 +158,132 @@ python -m pip install -r backend/requirements.txt
 ```powershell
 py -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
 python -m pip install -r backend\requirements.txt
+Copy-Item backend\.env.example backend\.env
 ```
 
-### Create the first administrator
+## 7. Configure PostgreSQL / Neon
 
-After activating the virtual environment:
+Open `backend/.env`.
+
+For Neon, paste the connection strings supplied by the Neon project:
+
+```env
+DATABASE_URL=postgresql://...
+DIRECT_DATABASE_URL=postgresql://...
+DB_CONNECT_TIMEOUT=15
+DB_TIMEZONE=Asia/Ho_Chi_Minh
+DB_SSLMODE=
+
+JWT_SECRET=YOUR_RANDOM_SECRET
+HOST=127.0.0.1
+PORT=5000
+FLASK_DEBUG=false
+CORS_ORIGINS=http://localhost:8443,http://127.0.0.1:8443
+```
+
+`DATABASE_URL` is used by the running backend.  
+`DIRECT_DATABASE_URL` is used by `setup_database.py` when it is provided.
+
+If the group uses one shared Neon database, each member creates their own `backend/.env` locally and enters the same shared Neon database information.
+
+Do not send or store the real `.env` through GitHub.
+
+If PostgreSQL is installed locally instead, leave `DATABASE_URL` empty and fill:
+
+```env
+db_host=localhost
+db_port=5432
+db_name=course_registration_system
+db_user=postgres
+db_password=YOUR_PASSWORD
+```
+
+Generate a JWT secret with:
 
 ```bash
-cd backend
-python create_admin.py
+python -c "import secrets; print(secrets.token_urlsafe(48))"
 ```
 
-Enter the Admin ID, full name, email, and password. The login username is the lowercase Admin ID.
+Copy the generated value to `JWT_SECRET`.
 
-### Run the backend
+**Do not upload or commit `backend/.env`.** It contains private database information and the JWT secret.
 
-From the `backend/` directory, while the virtual environment is still active:
+## 8. Create the database tables
+
+This step is needed only for a new, empty database.
+
+From the project root:
 
 ```bash
-python app.py
+python backend/setup_database.py
 ```
 
-The backend runs at `http://127.0.0.1:5000`.
+The script reads `database/schema.sql` and creates the project tables, constraints, triggers and schema version.
 
-Check status:
+For a shared Neon database, this command only needs to be run **once**. Other group members who connect to the same already-initialized database do not need to run it again.
+
+## 9. Create the first Admin account
+
+After the database has been created:
+
+```bash
+python backend/create_admin.py
+```
+
+Enter:
+
+- Admin ID
+- Full name
+- Email
+- Password
+
+The username is the Admin ID converted to lowercase.
+
+For a shared Neon database, only **one group member** needs to create the first Admin account.
+
+After the first Admin exists, the Admin can create Lecturer and Student accounts from the website. Because the accounts are stored in the shared database, other group members can use the same accounts.
+
+## 10. Run the backend
+
+From the project root, with the virtual environment active:
+
+```bash
+python backend/main.py
+```
+
+Default backend address:
 
 ```text
-GET http://127.0.0.1:5000/api/health
+http://127.0.0.1:5000
 ```
 
-When PostgreSQL is ready, the API returns:
+Check the backend:
+
+```text
+http://127.0.0.1:5000/
+```
+
+Check the backend and database connection:
+
+```text
+http://127.0.0.1:5000/api/health
+```
+
+A working database should return a response with:
 
 ```json
-{"status":"ok","database":"ok"}
+{
+  "status": "ok",
+  "database": "ok"
+}
 ```
 
-## Frontend setup and run
+Keep this Terminal running.
 
-Open a second terminal at the project root:
+## 11. Run the frontend
+
+Open a second Terminal:
 
 ```bash
 cd frontend
@@ -132,86 +291,275 @@ npm install
 npm run dev
 ```
 
-Vite runs at `http://localhost:8443` by default. In development, Vite proxies `/api` to `http://127.0.0.1:5000`.
-
-If the backend is at a different address, create `frontend/.env`:
-
-```env
-VITE_API_URL=http://127.0.0.1:5000
-```
-
-## Startup order
-
-1. Start PostgreSQL.
-2. Activate `.venv` and run `python app.py` in `backend/`.
-3. Run `npm run dev` in `frontend/`.
-4. Open the Vite URL shown in the terminal and log in with the administrator account you created.
-
-## Main API
-
-| Role | Prefix |
-| --- | --- |
-| Authentication/account | `/api/login`, `/api/me`, `/api/account/*` |
-| Administrator | `/api/admin/*` |
-| Lecturer | `/api/lecturer/*` |
-| Student | `/api/student/*` |
-
-All protected endpoints use the header:
+Open:
 
 ```text
-Authorization: Bearer <token>
+http://localhost:8443
 ```
 
-## Quality checks
+The Vite development server automatically sends `/api` requests to the Flask backend at `http://127.0.0.1:5000`.
 
-Run from the project root after installing backend dependencies:
+Normally, `frontend/.env` is not required for local development.
+
+If the frontend must call a backend at another URL, create `frontend/.env` from the example:
 
 ```bash
-python backend/checks/schema_check.py
-python backend/checks/static_check.py
+cp .env.example .env
+```
+
+Then set:
+
+```env
+VITE_API_URL=https://your-backend-url
+```
+
+`VITE_API_URL` is a **backend HTTP URL**, not a PostgreSQL connection string.
+
+## 12. Stop the system
+
+To stop the frontend or backend development server, go to the Terminal where it is running and press:
+
+```text
+Ctrl + C
+```
+
+If both frontend and backend are running in separate Terminals, stop each one separately.
+
+## 13. Run unit tests
+
+Activate the Python virtual environment and run from the project root:
+
+```bash
 python -m unittest discover -s tests/unit -v
 ```
 
-The integration check requires PostgreSQL to be running and permission to create schemas. It creates a temporary schema, deletes it automatically when finished, and does not modify existing application data:
+Current unit tests cover examples of:
 
-```bash
-python backend/checks/integration_check.py
-```
+- User authentication validation
+- Course value validation
+- Database connection behavior
+- Grade/result calculation
 
-Check the frontend:
+Frontend TypeScript can be checked with:
 
 ```bash
 cd frontend
 npm run typecheck
+```
+
+A production frontend build can be checked with:
+
+```bash
 npm run build
 ```
 
-## Troubleshooting
+## 14. Important files
 
-### Cannot connect to PostgreSQL
+### Backend
 
-Check that PostgreSQL is running, the database exists, and the `db_host`, `db_port`, `db_name`, `db_user`, and `db_password` values in `backend/.env` are correct.
+- `backend/main.py` - starts Flask, registers the API route groups and provides health endpoints.
+- `backend/config.py` - reads JWT settings from `.env`.
+- `backend/database.py` - opens PostgreSQL connections and provides query helper methods.
+- `backend/setup_database.py` - initializes a new database using `database/schema.sql`.
+- `backend/create_admin.py` - creates the first Administrator account.
+- `backend/models/` - contains the object-oriented system logic.
+- `backend/routes/` - contains HTTP API endpoints for the frontend.
+- `backend/utils/` - contains shared authentication, password and HTTP helper functions.
+
+### Frontend
+
+- `frontend/src/App.tsx` - defines application routes for Admin, Lecturer and Student.
+- `frontend/src/components/` - reusable user-interface components.
+- `frontend/src/pages/` - pages shown for each role.
+- `frontend/src/services/api.ts` - sends requests from React to the Flask API.
+- `frontend/src/types.ts` - shared TypeScript data types.
+- `frontend/src/styles.css` - global styles and Tailwind setup.
+- `frontend/vite.config.ts` - Vite configuration and local API proxy.
+
+### Database and tests
+
+- `database/schema.sql` - creates the PostgreSQL schema and database rules.
+- `tests/unit/` - basic unit tests.
+- `docs/` - project requirements, design and report documents.
+
+## 15. Shared Neon database
+
+When several group members use the same `DATABASE_URL`, they use the same PostgreSQL database even when they are on different networks.
+
+Example:
+
+```text
+Machine A -> local Flask A ----\
+                                -> Neon PostgreSQL
+Machine B -> local Flask B ----/
+```
+
+If Machine A creates a Student account, the data is stored in Neon. Machine B can see and use the same data because its backend connects to the same Neon database.
+
+The same applies to courses, semesters, registrations, grades and other database data.
+
+A tunnel is not required for the database connection because each computer connects directly to Neon through the Internet.
+
+Each member still runs their own local frontend and backend:
+
+```text
+Machine A:
+React A -> Flask A -> Neon
+
+Machine B:
+React B -> Flask B -> Neon
+```
+
+## 16. Common problems
+
+### `ModuleNotFoundError`
+
+Make sure the virtual environment is active and install:
+
+```bash
+python -m pip install -r backend/requirements.txt
+```
 
 ### Port 5000 is already in use
 
-macOS / Linux:
+Find the old Flask process and stop it, or change `PORT` in `backend/.env`.
+
+### Port 8443 is already in use
+
+Stop the old Vite process before running `npm run dev` again.
+
+### `/api/health` says database unavailable
+
+Check:
+
+- `DATABASE_URL`
+- Neon project status
+- Internet connection
+- PostgreSQL username/password
+- SSL parameters in the connection string
+
+### Login does not work
+
+Check that:
+
+- the database schema exists;
+- an Admin/user account exists;
+- the account is active;
+- `JWT_SECRET` is set in `backend/.env`.
+
+## 17. Recommended run order for a new machine
+
+### Using an already-created shared Neon database
+
+For a group member cloning the project for the first time:
 
 ```bash
-lsof -i :5000
-kill PID
+git clone <repository-url>
+cd course-registration-system
+
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r backend/requirements.txt
+cp backend/.env.example backend/.env
 ```
 
-Windows PowerShell:
+Fill `backend/.env` with the shared Neon database information.
 
-```powershell
-netstat -ano | findstr :5000
-taskkill /PID <PID> /F
+Then start the backend:
+
+```bash
+python backend/main.py
 ```
 
-### Frontend opens but does not load data
+Open another Terminal and start the frontend:
 
-Confirm that the backend is running, `/api/health` returns `database: ok`, and `VITE_API_URL` is not set incorrectly in `frontend/.env`.
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-## Additional documentation
+Open:
 
-- [System specification](docs/system-document.md)
+```text
+http://localhost:8443
+```
+
+There is **no need** to run `setup_database.py` or `create_admin.py` again if the shared Neon database has already been initialized.
+
+### Using a new empty Neon database for the first time
+
+Complete the backend setup and configure `backend/.env`, then run:
+
+```bash
+python backend/setup_database.py
+python backend/create_admin.py
+```
+
+These two steps only need to be completed once for the shared database.
+
+Then start the system normally:
+
+```bash
+python backend/main.py
+```
+
+In another Terminal:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open:
+
+```text
+http://localhost:8443
+```
+
+## 18. Quick start summary
+
+### First group member with a new database
+
+```text
+Clone project
+    ↓
+Create .venv
+    ↓
+Install backend requirements
+    ↓
+Create backend/.env
+    ↓
+Add Neon database information
+    ↓
+Run setup_database.py
+    ↓
+Run create_admin.py
+    ↓
+Run backend
+    ↓
+Run frontend
+    ↓
+System ready
+```
+
+### Other group members
+
+```text
+Clone project
+    ↓
+Create .venv
+    ↓
+Install backend requirements
+    ↓
+Create backend/.env
+    ↓
+Add the SAME Neon database information
+    ↓
+Run backend
+    ↓
+Run frontend
+    ↓
+Use the same system data/accounts
+```

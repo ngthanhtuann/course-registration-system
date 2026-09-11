@@ -1,0 +1,52 @@
+"""Authorization utilities for the Flask API."""
+
+from functools import wraps
+import jwt
+from flask import jsonify, request
+from config import JWT_ALGORITHM, JWT_SECRET
+from database import get_db
+
+
+def get_current_user():
+    """Decode a valid Bearer JWT; return None if the token is expired or invalid."""
+    header = request.headers.get("Authorization", "")
+    if not header.startswith("Bearer "):
+        return None
+    try:
+        payload = jwt.decode(
+            header.split(" ", 1)[1], JWT_SECRET, algorithms=[JWT_ALGORITHM]
+        )
+        return payload
+    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+        return None
+
+
+def require_auth(*roles):
+    """Create checks for login, role, and active status before calling the API."""
+
+    def decorator(fn):
+        """Attach authorization checks to the API function and preserve its name with wraps."""
+
+        @wraps(fn)
+        def wrapper(*args, **kwargs):
+            """Reject unauthorized access or locked accounts before running business logic."""
+            user = get_current_user()
+            if not user:
+                return (jsonify({"error": "authentication required"}), 401)
+            if roles and user["role"] not in roles:
+                return (jsonify({"error": "forbidden"}), 403)
+            db = get_db()
+            try:
+                active = db.fetch_one(
+                    "select active_status from users where user_id=%s",
+                    (user["user_id"],),
+                )
+                if not active or not active.get("active_status", True):
+                    return (jsonify({"error": "account is inactive"}), 403)
+            finally:
+                db.close()
+            return fn(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
