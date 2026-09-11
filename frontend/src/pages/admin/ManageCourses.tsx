@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import {
   Card,
   Button,
@@ -13,6 +13,7 @@ import {
 } from "../../components/ui"
 import type { Column } from "../../components/ui"
 import { api } from "../../services/api"
+import { useAdminList } from "../../services/useAdminList"
 import type { Course } from "../../types"
 const map = (x: any): Course => ({
   code: x.course_code,
@@ -22,7 +23,8 @@ const map = (x: any): Course => ({
   capacity: Number(x.max_capacity),
 })
 export default function ManageCourse() {
-  const [courses, setCourses] = useState<Course[]>([])
+  const courseList = useAdminList("courses")
+  const courses = courseList.data.map(map)
   const [search, setSearch] = useState("")
   const [modal, setModal] = useState<"create" | "edit" | "view" | null>(null)
   const [selected, setSelected] = useState<Course | null>(null)
@@ -36,14 +38,6 @@ export default function ManageCourse() {
   })
   const [msg, setMsg] = useState("")
   const [err, setErr] = useState("")
-  const load = () =>
-    api.admin
-      .courses()
-      .then((x) => setCourses(x.map(map)))
-      .catch((e) => setErr(e.message))
-  useEffect(() => {
-    void load()
-  }, [])
   const filtered = courses.filter((c) =>
     (c.code + " " + c.name).toLowerCase().includes(search.toLowerCase()),
   )
@@ -67,7 +61,6 @@ export default function ManageCourse() {
         })
       setModal(null)
       setMsg("Course saved successfully.")
-      load()
     } catch (e: any) {
       setErr(e.message)
     }
@@ -78,7 +71,6 @@ export default function ManageCourse() {
       await api.admin.deleteCourse(del.code)
       setDel(null)
       setMsg("Course deleted successfully.")
-      load()
     } catch (e: any) {
       setDel(null)
       setErr(e.message)
@@ -165,9 +157,9 @@ export default function ManageCourse() {
         }
       />
       {msg && <Alert type="success" message={msg} />}{" "}
-      {err && (
+      {(err || courseList.error) && (
         <div className="my-3">
-          <Alert type="error" message={err} />
+          <Alert type="error" message={err || courseList.error} />
         </div>
       )}
       <Card className="mt-4">
@@ -181,6 +173,7 @@ export default function ManageCourse() {
         <DataTable
           columns={cols}
           rows={filtered}
+          loading={courseList.loading}
           keyFn={(r) => r.code}
           emptyText="No courses found."
         />

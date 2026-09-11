@@ -23,22 +23,31 @@ class Administrator(User):
         """Get information for the admin dashboard."""
         db = get_db()
         try:
+            # Read counts and the current semester in one trip to remote Neon.
             counts = db.fetch_one("""
-            select
+            select counts.*, semester.semester_id, semester.semester_name,
+                   semester.start_date, semester.end_date
+            from (select
                 (select count(*) from students) as total_students,
                 (select count(*) from lecturers where exists (
                     select 1 from users u where u.user_id=lecturers.user_id and u.active_status=true
                 )) as active_lecturers,
                 (select count(*) from courses) as total_courses,
                 (select count(*) from registrations where registration_status='registered') as active_registrations
+            ) counts
+            left join (
+                select semester_id, semester_name, start_date, end_date
+                from semesters
+                where current_date between start_date and end_date
+                order by start_date desc
+                limit 1
+            ) semester on true
         """)
-            semester = db.fetch_one("""
-            select semester_id, semester_name, start_date, end_date
-            from semesters
-            where current_date between start_date and end_date
-            order by start_date desc
-            limit 1
-        """)
+            semester = {key: counts.pop(key) for key in (
+                "semester_id", "semester_name", "start_date", "end_date"
+            )}
+            if semester["semester_id"] is None:
+                semester = None
             return {**(counts or {}), "active_semester": semester}
         finally:
             db.close()

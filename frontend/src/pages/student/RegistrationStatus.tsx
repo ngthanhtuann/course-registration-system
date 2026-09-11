@@ -18,10 +18,12 @@ export default function ViewRegistrationStatus({
   const [semester, setSemester] = useState("")
   const [rows, setRows] = useState<any[]>([])
   const [period, setPeriod] = useState<any>(null)
+  const [periods, setPeriods] = useState<any[]>([])
   useEffect(() => {
     Promise.all([api.student.semesters(), api.student.periods()])
       .then(([s, p]) => {
         setSems(s)
+        setPeriods(p)
         if (s[0]) setSemester(s[0].semester_id)
         if (p[0]) setPeriod(p[0])
       })
@@ -33,13 +35,11 @@ export default function ViewRegistrationStatus({
         .registrations(semester)
         .then(setRows)
         .catch(() => setRows([]))
-      api.student
-        .periods()
-        .then((p) =>
-          setPeriod(p.find((x) => x.semester_id === semester) || null),
-        )
     }
   }, [semester])
+  useEffect(() => {
+    if (semester) setPeriod(periods.find((x) => x.semester_id === semester) || null)
+  }, [semester, periods])
   const cols: Column<any>[] = [
     {
       key: "course_code",

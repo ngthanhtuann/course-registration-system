@@ -16,10 +16,18 @@ export default function ViewCourses({ user }: { user: Student }) {
   const [search, setSearch] = useState("")
   const [view, setView] = useState<any>(null)
   useEffect(() => {
-    api.student
-      .courses("", search)
-      .then(setRows)
-      .catch(() => setRows([]))
+    let active = true
+    // Wait briefly while typing; ignore a response for an older search.
+    const timer = setTimeout(() => {
+      api.student
+        .courses("", search)
+        .then((rows) => { if (active) setRows(rows) })
+        .catch(() => { if (active) setRows([]) })
+    }, search ? 300 : 0)
+    return () => {
+      active = false
+      clearTimeout(timer)
+    }
   }, [search])
   const cols: Column<any>[] = [
     {

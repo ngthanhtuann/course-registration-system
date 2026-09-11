@@ -1,28 +1,30 @@
-import React, { useEffect, useState } from "react"
+import React, { lazy, Suspense, useEffect, useState } from "react"
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import type { AuthUser, Student, Lecturer } from "./types"
 import Layout from "./components/Layout"
 import Login from "./pages/LoginPage"
-import ManageAccount from "./pages/ManageAccount"
 import AdminDashboard from "./pages/admin/AdminDashboard"
-import ManageUser from "./pages/admin/ManageUser"
-import ManageMajor from "./pages/admin/ManageMajors"
-import ManageCurriculum from "./pages/admin/ManageCurriculum"
-import ManageCourse from "./pages/admin/ManageCourses"
-import ManageSemester from "./pages/admin/ManageSemesters"
-import ManageRegistrationPeriod from "./pages/admin/RegistrationPeriod"
-import ManageRegistrationDemand from "./pages/admin/RegistrationDemand"
-import AssignLecturer from "./pages/admin/AssignLecturer"
 import LecturerDashboard from "./pages/lecturer/LecturerDashboard"
-import ManageTeachingCourse from "./pages/lecturer/TeachingCourses"
-import ManageStudentGrades from "./pages/lecturer/ManageGrades"
 import StudentDashboard from "./pages/student/StudentDashboard"
-import ViewCourses from "./pages/student/ViewCourses"
-import CourseRegistration from "./pages/student/CourseRegistration"
-import ViewRegistrationStatus from "./pages/student/RegistrationStatus"
-import DropCourse from "./pages/student/DropCourse"
-import ViewGrades from "./pages/student/ViewGrades"
-import { api, clearAuth, getStoredUser, saveAuth } from "./services/api"
+import { api, ApiError, clearAuth, getStoredUser, saveAuth } from "./services/api"
+
+// Load secondary pages only when opened; keep the layout and dashboards ready.
+const ManageAccount = lazy(() => import("./pages/ManageAccount"))
+const ManageUser = lazy(() => import("./pages/admin/ManageUser"))
+const ManageMajor = lazy(() => import("./pages/admin/ManageMajors"))
+const ManageCurriculum = lazy(() => import("./pages/admin/ManageCurriculum"))
+const ManageCourse = lazy(() => import("./pages/admin/ManageCourses"))
+const ManageSemester = lazy(() => import("./pages/admin/ManageSemesters"))
+const ManageRegistrationPeriod = lazy(() => import("./pages/admin/RegistrationPeriod"))
+const ManageRegistrationDemand = lazy(() => import("./pages/admin/RegistrationDemand"))
+const AssignLecturer = lazy(() => import("./pages/admin/AssignLecturer"))
+const ManageTeachingCourse = lazy(() => import("./pages/lecturer/TeachingCourses"))
+const ManageStudentGrades = lazy(() => import("./pages/lecturer/ManageGrades"))
+const ViewCourses = lazy(() => import("./pages/student/ViewCourses"))
+const CourseRegistration = lazy(() => import("./pages/student/CourseRegistration"))
+const ViewRegistrationStatus = lazy(() => import("./pages/student/RegistrationStatus"))
+const DropCourse = lazy(() => import("./pages/student/DropCourse"))
+const ViewGrades = lazy(() => import("./pages/student/ViewGrades"))
 
 function ProtectedLayout({
   user,
@@ -47,72 +49,100 @@ function ProtectedLayout({
   }
   return (
     <Layout user={user} onLogout={onLogout}>
-      {children}
+      <Suspense fallback={<div className="p-6 text-slate-500">Loading?</div>}>
+        {children}
+      </Suspense>
     </Layout>
   )
 }
 
+function readCachedUser(): AuthUser {
+  if (!localStorage.getItem("crs_token")) return null
+  const cached = getStoredUser<AuthUser>()
+  if (
+    !cached || !cached.id || typeof cached.fullName !== "string" ||
+    !["admin", "student", "lecturer"].includes(cached.role) ||
+    cached.status !== "Active"
+  ) return null
+  return cached
+}
+
 export default function App() {
-  const [user, setUser] = useState<AuthUser>(() => getStoredUser<AuthUser>())
-  const [checkingSession, setCheckingSession] = useState(true)
+  const [user, setUser] = useState<AuthUser>(readCachedUser)
 
   useEffect(() => {
     let alive = true
+    const token = localStorage.getItem("crs_token")
+    const currentSession = () => alive && localStorage.getItem("crs_token") === token
+    const invalidate = () => {
+      // request() may already have removed this token after a 401. Never clear
+      // a newer login when a response from the previous session arrives late.
+      if (alive && (!localStorage.getItem("crs_token") || currentSession())) {
+        clearAuth()
+        setUser(null)
+      }
+    }
+    const publish = (next: Exclude<AuthUser, null>) => {
+      if (!currentSession()) {
+        if (alive && !localStorage.getItem("crs_token")) setUser(null)
+        return false
+      }
+      saveAuth(token!, next)
+      setUser((previous) => JSON.stringify(previous) === JSON.stringify(next) ? previous : next)
+      return true
+    }
     const restore = async () => {
-      if (!user) {
-        if (alive) setCheckingSession(false)
+      if (!user || !token) {
+        invalidate()
         return
       }
       try {
         const base = await api.me()
-        let full: any = base
-        if (base.role === "student") full = await api.student.profile()
-        if (base.role === "lecturer") full = await api.lecturer.profile()
-        const normalized =
-          base.role === "student"
-            ? {
-                id: full.user_id,
-                username: full.username,
-                fullName: full.fullname,
-                email: full.email,
-                role: "student",
-                status: "Active",
-                studentId: full.student_id,
-                major: full.major_code,
-              }
-            : base.role === "lecturer"
-              ? {
-                  id: full.user_id,
-                  username: full.username,
-                  fullName: full.fullname,
-                  email: full.email,
-                  role: "lecturer",
-                  status: "Active",
-                  lecturerId: full.lecturer_id,
-                  qualifications: full.qualifications || [],
-                }
-              : {
-                  id: full.user_id,
-                  username: full.username,
-                  fullName: full.fullname,
-                  email: full.email,
-                  role: "admin",
-                  status: "Active",
-                }
-        if (alive) {
-          setUser(normalized as AuthUser)
-          saveAuth(localStorage.getItem("crs_token") || "", normalized)
+        if (!currentSession()) {
+          if (alive && !localStorage.getItem("crs_token")) setUser(null)
+          return
         }
-      } catch {
-        if (alive) {
-          clearAuth()
+        if (!base?.user_id || !["admin", "student", "lecturer"].includes(base.role) ||
+            base.active_status === false) {
+          invalidate()
+          return
+        }
+        // Publish validated identity before waiting for optional profile data.
+        // Keep the cached role-specific fields only for the same identity/role.
+        const cached = user.id === base.user_id && user.role === base.role ? user : null
+        const common = {
+          id: base.user_id,
+          username: base.username,
+          fullName: base.fullname,
+          email: base.email,
+          status: "Active" as const,
+        }
+        const normalized: Exclude<AuthUser, null> = base.role === "student"
+          ? { ...common, role: "student", studentId: cached?.role === "student" ? cached.studentId : "",
+              major: cached?.role === "student" ? cached.major : "" }
+          : base.role === "lecturer"
+            ? { ...common, role: "lecturer", lecturerId: cached?.role === "lecturer" ? cached.lecturerId : "",
+                qualifications: cached?.role === "lecturer" ? cached.qualifications : [] }
+            : { ...common, role: "admin" }
+        if (!publish(normalized)) return
+        if (normalized.role === "student") {
+          const full = await api.student.profile()
+          publish({ ...normalized, studentId: full.student_id, major: full.major_code })
+        } else if (normalized.role === "lecturer") {
+          const full = await api.lecturer.profile()
+          publish({ ...normalized, lecturerId: full.lecturer_id, qualifications: full.qualifications || [] })
+        }
+      } catch (error) {
+        if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
+          invalidate()
+        } else if (alive && !localStorage.getItem("crs_token")) {
           setUser(null)
         }
-      } finally {
-        if (alive) setCheckingSession(false)
+        // Network/5xx errors do not prove the session invalid. Keep the visible
+        // cached user; all protected requests still require backend authorization.
       }
     }
-    restore()
+    void restore()
     return () => {
       alive = false
     }
@@ -122,13 +152,6 @@ export default function App() {
     clearAuth()
     setUser(null)
   }
-  if (checkingSession)
-    return (
-      <div className="min-h-screen flex items-center justify-center text-slate-500">
-        Loading…
-      </div>
-    )
-
   return (
     <BrowserRouter>
       <Routes>
