@@ -12,6 +12,7 @@ import {
 } from "../../components/ui"
 import type { Column } from "../../components/ui"
 import { api } from "../../services/api"
+import { useAdminList } from "../../services/useAdminList"
 import type { Semester, RegistrationPeriod } from "../../types"
 const mapS = (x: any): Semester => ({
   id: x.semester_id,
@@ -36,7 +37,8 @@ const mapP = (x: any): RegistrationPeriod => ({
   periodName: x.period_name || "Registration Period",
 })
 export default function ManageRegistrationPeriod() {
-  const [sems, setSems] = useState<Semester[]>([])
+  const semesterList = useAdminList("semesters")
+  const sems = semesterList.data.map(mapS)
   const [rows, setRows] = useState<RegistrationPeriod[]>([])
   const [selected, setSelected] = useState("")
   const [form, setForm] = useState({
@@ -247,9 +249,9 @@ export default function ManageRegistrationPeriod() {
         </div>
       </Card>
       {msg && <Alert type="success" message={msg} />}{" "}
-      {err && (
+      {(err || semesterList.error) && (
         <div className="my-3">
-          <Alert type="error" message={err} />
+          <Alert type="error" message={err || semesterList.error} />
         </div>
       )}
       <Card>

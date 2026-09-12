@@ -1,4 +1,9 @@
+import { clearAdminCache, invalidateAdminCache, loadAdminList } from "./adminCache"
+
 export const API_URL = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "")
+
+// Share only in-flight GETs. Grades, seats and authorization are not TTL-cached.
+const pendingReads = new Map<string, Promise<unknown>>()
 
 export class ApiError extends Error {
   status: number
@@ -17,9 +22,14 @@ function getToken() {
 }
 
 export function saveAuth(token: string, user: unknown) {
+  const changed = getToken() !== token
   localStorage.setItem("crs_token", token)
 
   localStorage.setItem("crs_user", JSON.stringify(user))
+  if (changed) {
+    pendingReads.clear()
+    clearAdminCache()
+  }
 }
 
 export function getStoredUser<T>() {
@@ -35,12 +45,34 @@ export function getStoredUser<T>() {
 }
 
 export function clearAuth() {
+  pendingReads.clear()
   localStorage.removeItem("crs_token")
 
   localStorage.removeItem("crs_user")
+  clearAdminCache()
 }
 
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+// Other tabs can change the shared authentication token, but list data stays
+// exclusively in this tab's memory.
+window.addEventListener("storage", (event) => {
+  if (event.key === "crs_token" || event.key === null) {
+    pendingReads.clear()
+    clearAdminCache()
+  }
+})
+
+function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+  if (options.method && options.method !== "GET") return sendRequest<T>(path, options)
+  const existing = pendingReads.get(path)
+  if (existing) return existing as Promise<T>
+  const pending = sendRequest<T>(path, options).finally(() => {
+    if (pendingReads.get(path) === pending) pendingReads.delete(path)
+  })
+  pendingReads.set(path, pending)
+  return pending
+}
+
+async function sendRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
   const headers = new Headers(options.headers)
 
   headers.set("Accept", "application/json")
@@ -79,11 +111,25 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     const message =
       data?.error || data?.message || `Request failed (${response.status})`
 
-    if (response.status === 401) clearAuth()
+    if (response.status === 401 && token === getToken()) clearAuth()
 
     throw new ApiError(message, response.status)
   }
 
+  if (token === getToken() && options.method && options.method !== "GET") {
+    // The refresh after a write must not join an older GET.
+    pendingReads.clear()
+    if (
+      /^\/api\/admin\/users(?:\/|$)/.test(path) ||
+      /^\/api\/admin\/lecturer-qualifications(?:\/|$)/.test(path) ||
+      path === "/api/account/profile"
+    ) invalidateAdminCache("users")
+    if (/^\/api\/admin\/courses(?:\/|$)/.test(path)) invalidateAdminCache("courses")
+    if (/^\/api\/admin\/majors(?:\/|$)/.test(path)) invalidateAdminCache("majors")
+    if (/^\/api\/admin\/semesters(?:\/|$)/.test(path)) {
+      invalidateAdminCache("semesters", "student:semesters", "lecturer:semesters")
+    }
+  }
   return data as T
 }
 
@@ -128,6 +174,7 @@ async function requestBlob(path: string, options: RequestInit = {}): Promise<Blo
 }
 
 export const api = {
+  logout: () => request<any>("/api/logout", { method: "POST" }),
   login: (username: string, password: string) =>
     request<{
       token: string
@@ -159,7 +206,7 @@ export const api = {
   admin: {
     dashboard: () => request<any>("/api/admin/dashboard"),
 
-    users: () => request<any[]>("/api/admin/users"),
+    users: () => loadAdminList("users", () => request<any[]>("/api/admin/users")),
 
     createUser: (payload: any) =>
       request<any>("/api/admin/users", {
@@ -178,7 +225,7 @@ export const api = {
         method: "DELETE",
       }),
 
-    majors: () => request<any[]>("/api/admin/majors"),
+    majors: () => loadAdminList("majors", () => request<any[]>("/api/admin/majors")),
 
     createMajor: (payload: any) =>
       request<any>("/api/admin/majors", {
@@ -197,7 +244,7 @@ export const api = {
         method: "DELETE",
       }),
 
-    courses: () => request<any[]>("/api/admin/courses"),
+    courses: () => loadAdminList("courses", () => request<any[]>("/api/admin/courses")),
 
     createCourse: (payload: any) =>
       request<any>("/api/admin/courses", {
@@ -236,7 +283,7 @@ export const api = {
         method: "DELETE",
       }),
 
-    semesters: () => request<any[]>("/api/admin/semesters"),
+    semesters: () => loadAdminList("semesters", () => request<any[]>("/api/admin/semesters")),
 
     createSemester: (payload: any) =>
       request<any>("/api/admin/semesters", {
@@ -339,7 +386,7 @@ export const api = {
   lecturer: {
     profile: () => request<any>("/api/lecturer/profile"),
 
-    semesters: () => request<any[]>("/api/lecturer/semesters"),
+    semesters: () => loadAdminList("lecturer:semesters", () => request<any[]>("/api/lecturer/semesters")),
 
     teachingCourses: (semesterId: string) =>
       request<any[]>(
@@ -361,7 +408,7 @@ export const api = {
   student: {
     profile: () => request<any>("/api/student/profile"),
 
-    semesters: () => request<any[]>("/api/student/semesters"),
+    semesters: () => loadAdminList("student:semesters", () => request<any[]>("/api/student/semesters")),
 
     periods: () => request<any[]>("/api/student/registration-periods"),
 

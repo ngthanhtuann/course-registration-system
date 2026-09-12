@@ -11,10 +11,23 @@ import {
 } from "../../components/ui"
 import type { Column } from "../../components/ui"
 import { api } from "../../services/api"
+import { useAdminList } from "../../services/useAdminList"
 import type { Major, Course } from "../../types"
 export default function ManageCurriculum() {
-  const [majors, setMajors] = useState<Major[]>([])
-  const [courses, setCourses] = useState<Course[]>([])
+  // Hai danh s?ch d?ng l?i cache, kh?ng ch? nhau m?i hi?n th?.
+  const majorList = useAdminList("majors")
+  const courseList = useAdminList("courses")
+  const majors: Major[] = majorList.data.map((m) => ({
+    code: m.major_code,
+    name: m.major_name,
+  }))
+  const courses: Course[] = courseList.data.map((c) => ({
+    code: c.course_code,
+    name: c.course_name,
+    credits: Number(c.credit),
+    prerequisite: c.prerequisite_course_code ?? null,
+    capacity: Number(c.max_capacity),
+  }))
   const [items, setItems] = useState<any[]>([])
   const [major, setMajor] = useState("")
   const [form, setForm] = useState({ course: "", semester: "1" })
@@ -146,9 +159,9 @@ export default function ManageCurriculum() {
         subtitle="Assign courses to a major and set recommended semester"
       />
       {msg && <Alert type="success" message={msg} />}{" "}
-      {err && (
+      {(err || majorList.error || courseList.error) && (
         <div className="my-3">
-          <Alert type="error" message={err} />
+          <Alert type="error" message={err || majorList.error || courseList.error} />
         </div>
       )}
       <Card className="p-4 mb-4">

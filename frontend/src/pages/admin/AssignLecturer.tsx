@@ -11,6 +11,7 @@ import {
 } from "../../components/ui"
 import type { Column } from "../../components/ui"
 import { api } from "../../services/api"
+import { useAdminList } from "../../services/useAdminList"
 export default function AssignLecturer() {
   const [semesters, setSemesters] = useState<any[]>([])
   const [courses, setCourses] = useState<any[]>([])
@@ -198,9 +199,9 @@ export default function AssignLecturer() {
           <Alert type="success" message={msg} />
         </div>
       )}
-      {err && (
+      {(err || semesterList.error || courseList.error) && (
         <div className="mb-3">
-          <Alert type="error" message={err} />
+          <Alert type="error" message={err || semesterList.error || courseList.error} />
         </div>
       )}
       <Card className="p-4 mb-5">

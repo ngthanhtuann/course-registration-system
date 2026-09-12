@@ -1,5 +1,7 @@
 """Functions shared by all users."""
 
+import re
+
 from database import get_db
 from utils.password import hash_password, check_password, make_token
 import psycopg2
@@ -260,6 +262,12 @@ class User:
             email = _valid_email(data.get("email"))
         except ValueError as exc:
             return ({"error": str(exc)}, 400)
+
+        if not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email):
+            return (
+                {"error": "Invalid email format"},
+                400,
+            )
 
         user = self.identity
         db = get_db()

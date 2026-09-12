@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import {
   Card,
   Button,
@@ -11,6 +11,7 @@ import {
 } from "../../components/ui"
 import type { Column } from "../../components/ui"
 import { api } from "../../services/api"
+import { useAdminList } from "../../services/useAdminList"
 import type { Semester } from "../../types"
 const map = (x: any): Semester => ({
   id: x.semester_id,
@@ -25,7 +26,8 @@ const map = (x: any): Semester => ({
         : "Upcoming",
 })
 export default function ManageSemester() {
-  const [rows, setRows] = useState<Semester[]>([])
+  const semesterList = useAdminList("semesters")
+  const rows = semesterList.data.map(map)
   const [modal, setModal] = useState<"create" | "edit" | null>(null)
   const [selected, setSelected] = useState<Semester | null>(null)
   const [del, setDel] = useState<Semester | null>(null)
@@ -69,7 +71,6 @@ export default function ManageSemester() {
         })
       setModal(null)
       setMsg("Semester saved successfully.")
-      load()
     } catch (e: any) {
       setErr(e.message)
     }
@@ -80,7 +81,6 @@ export default function ManageSemester() {
       await api.admin.deleteSemester(del.id)
       setDel(null)
       setMsg("Semester deleted successfully.")
-      load()
     } catch (e: any) {
       setErr(e.message)
       throw e
@@ -150,9 +150,9 @@ export default function ManageSemester() {
         }
       />
       {msg && <Alert type="success" message={msg} />}{" "}
-      {err && (
+      {(err || semesterList.error) && (
         <div className="my-3">
-          <Alert type="error" message={err} />
+          <Alert type="error" message={err || semesterList.error} />
         </div>
       )}
       <Card className="mt-4">
@@ -160,6 +160,7 @@ export default function ManageSemester() {
           loading={loading}
           error={loadError}
           columns={cols}
+          loading={semesterList.loading}
           rows={rows}
           keyFn={(r) => r.id}
           emptyText="No semesters found."

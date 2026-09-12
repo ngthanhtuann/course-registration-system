@@ -1,3 +1,4 @@
+import atexit
 import os
 from threading import Lock
 from time import perf_counter
@@ -351,6 +352,10 @@ class Database:
 
             return result
 
+        except Exception:
+            self._rollback_after_error()
+            raise
+
         finally:
 
             cursor.close()
@@ -390,6 +395,10 @@ class Database:
             )
 
             return result
+
+        except Exception:
+            self._rollback_after_error()
+            raise
 
         finally:
 

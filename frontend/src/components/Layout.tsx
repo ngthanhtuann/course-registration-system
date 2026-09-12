@@ -1,6 +1,7 @@
 import React, { useState } from "react"
 import { NavLink, useNavigate } from "react-router-dom"
 import type { AuthUser } from "../types"
+import { prefetchPage } from "../services/pagePrefetch"
 
 interface NavItem {
   label: string
@@ -331,6 +332,9 @@ function SidebarContent({
           <NavLink
             key={item.path}
             to={item.path}
+            onMouseEnter={() => prefetchPage(item.path)}
+            onFocus={() => prefetchPage(item.path)}
+            onTouchStart={() => prefetchPage(item.path)}
             onClick={onClose}
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors

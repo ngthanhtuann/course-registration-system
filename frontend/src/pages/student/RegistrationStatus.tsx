@@ -25,6 +25,7 @@ export default function ViewRegistrationStatus({
       .then((s) => {
         if (!active) return
         setSems(s)
+        setPeriods(p)
         if (s[0]) setSemester(s[0].semester_id)
         else setLoading(false)
       })

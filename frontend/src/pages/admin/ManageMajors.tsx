@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import {
   Card,
   Button,
@@ -11,9 +11,15 @@ import {
 } from "../../components/ui"
 import type { Column } from "../../components/ui"
 import { api } from "../../services/api"
+import { useAdminList } from "../../services/useAdminList"
 import type { Major } from "../../types"
 export default function ManageMajor() {
-  const [rows, setRows] = useState<Major[]>([])
+  // D?ng d? li?u ?? t?i s?n; hook t? c?p nh?t sau khi th?m/s?a/x?a.
+  const majorList = useAdminList("majors")
+  const rows: Major[] = majorList.data.map((m) => ({
+    code: m.major_code,
+    name: m.major_name,
+  }))
   const [modal, setModal] = useState<"create" | "edit" | "view" | null>(null)
   const [selected, setSelected] = useState<Major | null>(null)
   const [form, setForm] = useState({ code: "", name: "" })
@@ -53,7 +59,6 @@ export default function ManageMajor() {
         })
       setModal(null)
       setMsg("Major saved successfully.")
-      load()
     } catch (e: any) {
       setErr(e.message)
     }
@@ -64,7 +69,6 @@ export default function ManageMajor() {
       await api.admin.deleteMajor(del.code)
       setDel(null)
       setMsg("Major deleted successfully.")
-      load()
     } catch (e: any) {
       setErr(e.message)
       throw e
@@ -132,9 +136,9 @@ export default function ManageMajor() {
         }
       />
       {msg && <Alert type="success" message={msg} />}{" "}
-      {err && (
+      {(err || majorList.error) && (
         <div className="my-3">
-          <Alert type="error" message={err} />
+          <Alert type="error" message={err || majorList.error} />
         </div>
       )}
       <Card className="mt-4">
@@ -143,6 +147,7 @@ export default function ManageMajor() {
           error={loadError}
           columns={cols}
           rows={rows}
+          loading={majorList.loading}
           keyFn={(r) => r.code}
           emptyText="No majors found."
         />

@@ -15,6 +15,7 @@ import {
 } from "../../components/ui"
 import type { Column } from "../../components/ui"
 import { api } from "../../services/api"
+import { useAdminList } from "../../services/useAdminList"
 function CoursePicker({
   selected,
   onChange,
@@ -119,9 +120,12 @@ function chips(codes: string[]) {
   )
 }
 export default function ManageUser() {
-  const [users, setUsers] = useState<any[]>([])
-  const [majors, setMajors] = useState<any[]>([])
-  const [courses, setCourses] = useState<any[]>([])
+  const userList = useAdminList("users")
+  const majorList = useAdminList("majors")
+  const courseList = useAdminList("courses")
+  const users = userList.data
+  const majors = majorList.data
+  const courses = courseList.data
   const [search, setSearch] = useState("")
   const [role, setRole] = useState("")
   const [modal, setModal] =
@@ -229,7 +233,6 @@ export default function ManageUser() {
         dob: "",
         qualifications: [],
       })
-      load()
     } catch (e: any) {
       setErr(e.message)
     }
@@ -245,7 +248,6 @@ export default function ManageUser() {
       await api.admin.updateUser(selected.id, payload)
       setModal(null)
       setMsg("User updated successfully.")
-      load()
     } catch (e: any) {
       setErr(e.message)
     }
@@ -256,7 +258,6 @@ export default function ManageUser() {
       await api.admin.deactivateUser(del.id)
       setDel(null)
       setMsg("User deactivated successfully.")
-      load()
     } catch (e: any) {
       setErr(e.message)
       throw e
@@ -420,9 +421,12 @@ export default function ManageUser() {
           <Alert type="success" message={msg} />
         </div>
       )}
-      {err && (
+      {(err || userList.error || majorList.error || courseList.error) && (
         <div className="mb-3">
-          <Alert type="error" message={err} />
+          <Alert
+            type="error"
+            message={err || userList.error || majorList.error || courseList.error}
+          />
         </div>
       )}
       <Card>
@@ -450,6 +454,7 @@ export default function ManageUser() {
           error={loadError}
           columns={cols}
           rows={rows}
+          loading={userList.loading}
           keyFn={(u) => u.id}
           emptyText="No users found."
         />

@@ -1,7 +1,7 @@
 """API routes for login and account management."""
 
 from flask import Blueprint
-from utils.auth import require_auth, get_current_user
+from utils.auth import require_auth, get_current_user, revoke_current_token
 from utils.http_support import api_response, read_json_object
 from models.user import User
 auth_bp = Blueprint("auth", __name__, url_prefix="/api")
@@ -61,4 +61,5 @@ def logout():
     account = User(current_user)
 
     result = account.logout()
+    revoke_current_token(current_user)
     return api_response(result)
