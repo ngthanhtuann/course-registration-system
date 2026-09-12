@@ -85,6 +85,12 @@ class User:
         username_value = data.get("username")
         password_value = data.get("password")
 
+        if "username" not in data or "password" not in data:
+            return (
+                {"error": "username and password are required"},
+                400,
+            )
+
         # Reject malformed JSON values before they reach SQL or bcrypt.
         if not isinstance(username_value, str) or not isinstance(password_value, str):
             return (

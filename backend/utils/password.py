@@ -1,6 +1,7 @@
 """Password/JWT utilities independent of HTTP."""
 
 from datetime import datetime, timedelta, timezone
+from uuid import uuid4
 import bcrypt
 import jwt
 from config import JWT_ALGORITHM, JWT_EXPIRE_HOURS, JWT_SECRET
@@ -19,6 +20,7 @@ def check_password(password, password_hash):
 def make_token(user):
     """Issue a JWT containing the user ID, role, and configured expiration time."""
     payload = {
+        "jti": str(uuid4()),
         "user_id": user["user_id"],
         "username": user["username"],
         "role": user["role"],
