@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 import {
   Card,
@@ -9,6 +9,7 @@ import {
   SectionHeader,
   Modal,
   Alert,
+  SearchBox,
 } from "../../components/ui"
 
 import type { Column } from "../../components/ui"
@@ -22,6 +23,7 @@ export default function ManageRegistrationDemand() {
 
   const [period, setPeriod] = useState("")
   const [major, setMajor] = useState("")
+  const [search, setSearch] = useState("")
 
   const [course, setCourse] = useState("")
 
@@ -88,6 +90,16 @@ export default function ManageRegistrationDemand() {
       })
     return () => { active = false }
   }, [period, major])
+
+  const filteredRows = useMemo(() => {
+    const keyword = search.trim().toLowerCase()
+    if (!keyword) return rows
+
+    return rows.filter((row) =>
+      String(row.course_code || "").toLowerCase().includes(keyword) ||
+      String(row.course_name || "").toLowerCase().includes(keyword)
+    )
+  }, [rows, search])
 
   // =========================================================
   // VIEW STUDENTS
@@ -221,6 +233,16 @@ export default function ManageRegistrationDemand() {
           />
 
         </div>
+
+        <div className="mt-4">
+          <p className="text-sm font-medium text-slate-700 mb-1.5">Search Course</p>
+          <SearchBox
+            value={search}
+            onChange={setSearch}
+            placeholder="Search by course code or course name..."
+          />
+        </div>
+
         <Button className="mt-4" onClick={exportReport} disabled={!period || loading || demandLoading || !!loadError || !!demandError || exporting}>
           {exporting ? "Generating…" : "Generate Demand Report (CSV)"}
         </Button>
@@ -250,11 +272,17 @@ export default function ManageRegistrationDemand() {
           loading={loading || demandLoading}
           error={loadError || demandError}
           columns={cols}
-          rows={rows}
+          rows={filteredRows}
           keyFn={(r) =>
             r.course_code
           }
-          emptyText={period ? "No registration demand found." : "Select a registration period to view demand."}
+          emptyText={
+            !period
+              ? "Select a registration period to view demand."
+              : search.trim()
+                ? "No courses match your search."
+                : "No registration demand found."
+          }
         />
       </Card>
 

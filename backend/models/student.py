@@ -424,7 +424,9 @@ class Student(User):
             join courses c on c.course_code=r.course_code
             join registration_periods rp on rp.period_id=r.period_id
             join semesters s on s.semester_id=rp.semester_id
-            where st.user_id=%s and (%s is null or s.semester_id=%s)
+            where st.user_id=%s
+              and r.registration_status='registered'
+              and (%s is null or s.semester_id=%s)
             order by s.start_date desc, c.course_code
         """,
                 (student["user_id"], semester_id, semester_id),

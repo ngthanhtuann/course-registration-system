@@ -22,8 +22,8 @@ class Semester:
     def checkOverlap(self, otherSemester):
         """Check whether two semester date ranges overlap."""
         return (
-            self.startDate < otherSemester.endDate
-            and self.endDate > otherSemester.startDate
+            self.startDate <= otherSemester.endDate
+            and self.endDate >= otherSemester.startDate
         )
 
     def overlapsExisting(self, db):

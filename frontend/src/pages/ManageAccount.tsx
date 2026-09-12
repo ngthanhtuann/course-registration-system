@@ -70,10 +70,14 @@ export default function ManageAccount({ user, onLogout, onUserUpdated }: Props) 
     setLoading(true)
     try {
       await api.changePassword(currentPassword, newPassword)
-      setSuccess("Password changed successfully.")
       setCurrentPassword("")
       setNewPassword("")
       setConfirmPassword("")
+
+      // Changing the password revokes every existing JWT, including this one.
+      // Clear the current session and require a fresh login with the new password.
+      await onLogout()
+      navigate("/login")
     } catch (err: any) {
       setError(err.message)
     } finally {

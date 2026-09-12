@@ -377,7 +377,10 @@ class User:
             db.execute(
                 """
                 update users
-                set password_hash = %s
+                set password_hash = %s,
+                    token_version = coalesce(token_version, 0) + 1,
+                    failed_login_attempts = 0,
+                    locked_until = null
                 where user_id = %s
                 """,
                 (

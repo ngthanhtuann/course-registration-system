@@ -131,7 +131,8 @@ class Lecturer(User):
             )
             row = db.fetch_one(
                 """
-            select r.registration_id, rp.semester_id
+            select r.registration_id, rp.semester_id,
+                   rp.end_date < current_date as period_ended
             from registrations r
             join registration_periods rp on rp.period_id=r.period_id
             join teaching_assignments ta on ta.course_code=r.course_code and ta.semester_id=rp.semester_id
@@ -147,16 +148,11 @@ class Lecturer(User):
                     },
                     403,
                 )
-            periods = db.fetch_all(
-                "select end_date < current_date as ended from registration_periods where semester_id=%s for update",
-                (row["semester_id"],),
-            )
-            # Grades can be entered after registration periods have ended.
-            if not periods:
+
+            # A grade is allowed as soon as this registration's own period has ended.
+            # Other registration periods in the same semester must not block it.
+            if not row["period_ended"]:
                 return ({"error": "registration period has not ended"}, 400)
-            for period in periods:
-                if not period["ended"]:
-                    return ({"error": "registration period has not ended"}, 400)
 
             db.execute_query(
                 "update registrations set grade=%s, result_status=%s where registration_id=%s",
