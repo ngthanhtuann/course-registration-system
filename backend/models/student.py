@@ -75,7 +75,9 @@ class Student(User):
         db = get_db()
         try:
             return db.fetch_all(
-                "select rp.*, case when current_date < rp.start_date then 'upcoming' when current_date <= rp.end_date then 'open' else 'closed' end as current_status from registration_periods rp order by rp.start_date desc"
+                "select rp.*, case when current_date < rp.start_date then 'upcoming' when current_date <= rp.end_date then 'open' else 'closed' end as current_status, "
+                "case when current_date < rp.drop_start_date then 'upcoming' when current_date <= rp.drop_end_date then 'open' else 'closed' end as current_drop_status "
+                "from registration_periods rp order by rp.start_date desc, rp.period_id"
             )
         finally:
             db.close()
@@ -99,16 +101,28 @@ class Student(User):
         """Get courses with prerequisite and seat information."""
         student = self.identity
         search = query.get("search", "").strip()
-        period_id = query.get("period_id")
+        period_id = query.get("period_id") or None
         db = get_db()
         try:
             if period_id is not None:
                 period = db.fetch_one(
-                    "select period_id from registration_periods where period_id=%s",
+                    "select period_id, semester_id from registration_periods where period_id=%s",
                     (period_id,),
                 )
                 if not period:
                     return ({"error": "registration period not found"}, 404)
+                semester_id = period["semester_id"]
+            else:
+                # View Courses has no period selector. Use one academic semester
+                # for both registration visibility and capacity calculations.
+                semester = db.fetch_one(
+                    "select semester_id from semesters order by "
+                    "case when current_date between start_date and end_date then 0 "
+                    "when start_date > current_date then 1 else 2 end, "
+                    "case when start_date > current_date then start_date end asc, "
+                    "start_date desc, semester_id limit 1"
+                )
+                semester_id = semester["semester_id"] if semester else None
             student_record = db.fetch_one(
                 "select student_id from students where user_id=%s",
                 (student["user_id"],),
@@ -119,40 +133,42 @@ class Student(User):
                 """
             select c.course_code, c.course_name, c.credit,
                    c.prerequisite_course_code, pc.course_name as prerequisite_name,
-                   cu.recommended_semester, c.max_capacity,
-                   c.max_capacity - count(r.registration_id) filter (where r.registration_status='registered') as available_seats,
+                   cu.recommended_semester, c.max_capacity, %s::varchar as semester_id,
+                   greatest(0, c.max_capacity - count(r.registration_id) filter (where r.status='REGISTERED')) as available_seats,
                    case when c.prerequisite_course_code is null then 'N/A'
                         when exists (select 1 from registrations pr where pr.student_id=s.student_id and pr.course_code=c.prerequisite_course_code and pr.result_status='passed') then 'Satisfied'
                         else 'Not Satisfied' end as prerequisite_status,
-                   case when exists (select 1 from registrations sr where sr.student_id=s.student_id and sr.course_code=c.course_code and sr.semester_id=(select semester_id from registration_periods where period_id=%s) and sr.registration_status='registered') then 'Registered' else 'Available' end as reg_status
+                   'Available' as reg_status
             from students s
             join curriculum cu on cu.major_code=s.major_code
             join courses c on c.course_code=cu.course_code
             left join courses pc on pc.course_code=c.prerequisite_course_code
-            left join registrations r on r.course_code=c.course_code and r.semester_id=(select semester_id from registration_periods where period_id=%s)
+            left join registrations r on r.course_id=c.course_id and r.semester_id=%s
             where s.student_id=%s
               and (c.course_code ilike %s or c.course_name ilike %s)
               and not exists (
                   select 1 from registrations r2
-                  where r2.student_id=s.student_id and r2.course_code=c.course_code and r2.semester_id=(select semester_id from registration_periods where period_id=%s)
-                    and r2.registration_status='registered'
+                  where r2.student_id=s.student_id and r2.course_id=c.course_id
+                    and (%s is null or r2.semester_id=%s)
+                    and r2.status='REGISTERED'
               )
               and not exists (
                   select 1 from registrations r3
                   where r3.student_id=s.student_id and r3.course_code=c.course_code
                     and r3.result_status='passed'
               )
-            group by c.course_code, c.course_name, c.credit, c.prerequisite_course_code,
+            group by c.course_id, c.course_code, c.course_name, c.credit, c.prerequisite_course_code,
                      pc.course_name, cu.recommended_semester, c.max_capacity, s.student_id
             order by c.course_code
         """,
                 (
-                    period_id,
-                    period_id,
+                    semester_id,
+                    semester_id,
                     student_record["student_id"],
                     f"%{search}%",
                     f"%{search}%",
-                    period_id,
+                    semester_id,
+                    semester_id,
                 ),
             )
         finally:
@@ -277,6 +293,7 @@ class Student(User):
                     period_id = excluded.period_id,
                     grade = null,
                     result_status = null
+                where registrations.status = 'DROPPED'
                 returning registration_id
                 """,
                 (
@@ -289,6 +306,9 @@ class Student(User):
                 ),
             )
 
+            if not saved:
+                db.conn.rollback()
+                return ({"error": "student is already registered for this course"}, 409)
             db.conn.commit()
             return (
                 {
@@ -304,7 +324,7 @@ class Student(User):
                 {"error": "registration conflicts with existing data or course capacity"},
                 409,
             )
-        except Exception:
+        except psycopg2.Error:
             db.conn.rollback()
             raise
         finally:
@@ -320,7 +340,8 @@ class Student(User):
                 """
             select r.registration_id, c.course_code, c.course_name, c.credit,
                    initcap(r.registration_status) as status, c.max_capacity,
-                   (c.max_capacity - (select count(*) from registrations rr where rr.course_code=r.course_code and rr.semester_id=r.semester_id and rr.registration_status='registered')) as available_seats,
+                   greatest(0, c.max_capacity - (select count(*) from registrations rr where rr.course_id=r.course_id and rr.semester_id=r.semester_id and rr.status='REGISTERED')) as available_seats,
+                   r.period_id, r.semester_id, rp.period_name,
                    rp.start_date as registration_start_date,
                    rp.end_date as registration_end_date,
                    rp.drop_start_date, rp.drop_end_date,

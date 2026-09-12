@@ -172,7 +172,7 @@ def health():
 
         if (
             not version
-            or version["version"] != 1
+            or version["version"] != 2
         ):
 
             return jsonify(

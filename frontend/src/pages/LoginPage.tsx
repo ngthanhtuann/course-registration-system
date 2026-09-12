@@ -32,13 +32,6 @@ export default function Login({ onLogin }: LoginProps) {
       // Login
       const result = await api.login(username.trim(), password)
 
-      /*
-       * IMPORTANT:
-       * Save the JWT BEFORE calling protected APIs such as
-       * /api/student/profile or /api/lecturer/profile.
-       */
-      saveAuth(result.token, result.user)
-
       const base = result.user
 
       // The login response already contains the role-specific profile fields,

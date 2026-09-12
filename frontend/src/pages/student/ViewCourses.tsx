@@ -53,17 +53,15 @@ export default function ViewCourses({
         const data =
           await api.student.courses("", "")
 
+        if (!Array.isArray(data)) {
+          throw new Error("Could not load courses: invalid response.")
+        }
+
         if (!cancelled) {
-          setCourses(
-            Array.isArray(data)
-              ? data
-              : []
-          )
+          setCourses(data)
         }
       } catch (err: any) {
         if (!cancelled) {
-          setCourses([])
-
           setError(
             err?.message ||
               "Could not load courses."
@@ -161,6 +159,14 @@ export default function ViewCourses({
     },
 
     {
+      key: "available_seats",
+
+      header: "Available Seats",
+
+      render: (r) => r.available_seats ?? "—",
+    },
+
+    {
       key: "prerequisite_status",
 
       header: "Prerequisite",
@@ -226,7 +232,7 @@ export default function ViewCourses({
           <div className="p-6 text-sm text-slate-500">
             Loading courses...
           </div>
-        ) : (
+        ) : !error ? (
           <DataTable
             columns={cols}
             rows={rows}
@@ -235,7 +241,7 @@ export default function ViewCourses({
             }
             emptyText="No courses available."
           />
-        )}
+        ) : null}
       </Card>
 
       <Modal
@@ -285,6 +291,11 @@ export default function ViewCourses({
               [
                 "Capacity",
                 view.max_capacity,
+              ],
+
+              [
+                "Available Seats",
+                view.available_seats ?? "—",
               ],
             ].map(([key, value]) => (
               <div

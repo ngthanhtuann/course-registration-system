@@ -16,7 +16,10 @@ create table users (
     full_name varchar(100) not null,
     email varchar(100) not null unique,
     role varchar(20) not null check (role in ('admin', 'lecturer', 'student')),
-    active_status boolean not null default true
+    active_status boolean not null default true,
+    failed_login_attempts integer not null default 0 check (failed_login_attempts >= 0),
+    locked_until timestamptz,
+    token_version bigint not null default 0 check (token_version >= 0)
 );
 
 
@@ -251,5 +254,5 @@ create table schema_version (
     version integer primary key,
     installed_at timestamptz not null default current_timestamp
 );
-insert into schema_version(version) values (1);
+insert into schema_version(version) values (2);
 commit;

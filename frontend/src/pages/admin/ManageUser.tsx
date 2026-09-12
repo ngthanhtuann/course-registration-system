@@ -140,7 +140,11 @@ export default function ManageUser() {
   const [qualCourse, setQualCourse] = useState("")
   const [msg, setMsg] = useState("")
   const [err, setErr] = useState("")
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState("")
   const load = async () => {
+    setLoading(true)
+    setLoadError("")
     try {
       const [u, m, c] = await Promise.all([
         api.admin.users(),
@@ -152,8 +156,10 @@ export default function ManageUser() {
       setCourses(c)
       return u
     } catch (e: any) {
-      setErr(e.message)
-      return []
+      setLoadError(e.message)
+      return undefined
+    } finally {
+      setLoading(false)
     }
   }
   useEffect(() => {
@@ -252,8 +258,8 @@ export default function ManageUser() {
       setMsg("User deactivated successfully.")
       load()
     } catch (e: any) {
-      setDel(null)
       setErr(e.message)
+      throw e
     }
   }
   const addQual = async () => {
@@ -267,7 +273,7 @@ export default function ManageUser() {
       setMsg("Teaching qualification added.")
       const freshUsers = await load()
       const fresh = freshUsers
-        .map(normalized)
+        ?.map(normalized)
         .find((u: any) => u.id === selected.id)
       if (fresh) {
         setSelected(fresh)
@@ -284,7 +290,7 @@ export default function ManageUser() {
       setMsg("Teaching qualification removed.")
       const freshUsers = await load()
       const fresh = freshUsers
-        .map(normalized)
+        ?.map(normalized)
         .find((u: any) => u.id === selected.id)
       if (fresh) setSelected(fresh)
     } catch (e: any) {
@@ -440,6 +446,8 @@ export default function ManageUser() {
           />
         </div>
         <DataTable
+          loading={loading}
+          error={loadError}
           columns={cols}
           rows={rows}
           keyFn={(u) => u.id}

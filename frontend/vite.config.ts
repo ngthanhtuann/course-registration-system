@@ -13,6 +13,10 @@ const siteConfiguration = fs.existsSync(figmaSiteConfigPath)
 export default defineConfig(({ mode }) => {
   // .figma/make/deploy-preview passes `--mode development` for cached-preview builds.
   const emitSourcemaps = mode === 'development'
+  const configuredAllowedHosts = (process.env.VITE_ALLOWED_HOSTS || '')
+    .split(',')
+    .map((host) => host.trim())
+    .filter(Boolean)
 
   return {
     base: process.env.FIGMA_PUBLIC_URL ? `${process.env.FIGMA_PUBLIC_URL}/` : '/',
@@ -37,7 +41,7 @@ export default defineConfig(({ mode }) => {
       host: '0.0.0.0',
       port: parseInt(process.env.PORT || '8443'),
       strictPort: true,
-      allowedHosts: ['2rqv0dhs-8443.asse.devtunnels.ms'],
+      allowedHosts: configuredAllowedHosts.length > 0 ? configuredAllowedHosts : true,
       watch: { ignored: ['**/.figma/**'] },
       proxy: { '/api': { target: 'http://127.0.0.1:5000', changeOrigin: true } },
     },

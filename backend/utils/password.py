@@ -22,6 +22,7 @@ def make_token(user):
         "user_id": user["user_id"],
         "username": user["username"],
         "role": user["role"],
+        "token_version": user["token_version"],
         "exp": datetime.now(timezone.utc) + timedelta(hours=JWT_EXPIRE_HOURS),
     }
     return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)

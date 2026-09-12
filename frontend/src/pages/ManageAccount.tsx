@@ -12,9 +12,10 @@ import type { AuthUser, Student, Lecturer } from "../types"
 import { api } from "../services/api"
 interface Props {
   user: AuthUser
-  onLogout: () => void
+  onLogout: () => void | Promise<void>
+  onUserUpdated: (user: any) => void
 }
-export default function ManageAccount({ user, onLogout }: Props) {
+export default function ManageAccount({ user, onLogout, onUserUpdated }: Props) {
   const navigate = useNavigate()
   const [tab, setTab] = useState<"profile" | "password">("profile")
   const [success, setSuccess] = useState("")
@@ -41,7 +42,8 @@ export default function ManageAccount({ user, onLogout }: Props) {
     }
     setLoading(true)
     try {
-      await api.updateProfile(fullname.trim(), email.trim())
+      const result = await api.updateProfile(fullname.trim(), email.trim())
+      if (result?.user) onUserUpdated(result.user)
       setSuccess("Profile updated successfully.")
     } catch (err: any) {
       setError(err.message)
@@ -78,8 +80,8 @@ export default function ManageAccount({ user, onLogout }: Props) {
       setLoading(false)
     }
   }
-  const logout = () => {
-    onLogout()
+  const logout = async () => {
+    await onLogout()
     navigate("/login")
   }
   return (

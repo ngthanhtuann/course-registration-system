@@ -1,22 +1,22 @@
 import { useEffect, useState } from "react"
-import { Card, StatCard, SectionHeader, Badge } from "../../components/ui"
+import { Card, StatCard, SectionHeader, Badge, Alert } from "../../components/ui"
 import { api } from "../../services/api"
 import type { Lecturer } from "../../types"
 export default function Dashboard({ user }: { user: Lecturer }) {
-  const [, setSem] = useState<any[]>([])
   const [courses, setCourses] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
   useEffect(() => {
+    let active = true
     api.lecturer
       .semesters()
-      .then((x) => {
-        setSem(x)
-        if (x[0])
-          api.lecturer
-            .teachingCourses(x[0].semester_id)
-            .then(setCourses)
-            .catch(() => {})
+      .then((x) => x[0] ? api.lecturer.teachingCourses(x[0].semester_id) : [])
+      .then((data) => { if (active) setCourses(data) })
+      .catch((e) => {
+        if (active) setError(e.message || "Could not load teaching courses.")
       })
-      .catch(() => {})
+      .finally(() => { if (active) setLoading(false) })
+    return () => { active = false }
   }, [])
   const total = courses.reduce((s, c) => s + Number(c.student_count || 0), 0)
   return (
@@ -25,7 +25,9 @@ export default function Dashboard({ user }: { user: Lecturer }) {
         title="Lecturer Dashboard"
         subtitle={`Welcome, ${user.fullName}`}
       />
-      <div className="grid grid-cols-2 gap-4 mb-6">
+      {error && <div className="mb-4"><Alert type="error" message={error} /></div>}
+      {loading && <Card className="p-5 mb-4">Loading dashboard...</Card>}
+      {!loading && !error && <div className="grid grid-cols-2 gap-4 mb-6">
         <StatCard
           label="Teaching Courses"
           value={courses.length}
@@ -38,7 +40,7 @@ export default function Dashboard({ user }: { user: Lecturer }) {
           color="green"
           icon={<span>👥</span>}
         />
-      </div>
+      </div>}
       <Card className="p-5">
         <h3 className="font-semibold text-slate-800 mb-3">
           Teaching Qualifications
@@ -53,7 +55,7 @@ export default function Dashboard({ user }: { user: Lecturer }) {
           )}
         </div>
       </Card>
-      <Card className="p-5 mt-4">
+      {!loading && !error && <Card className="p-5 mt-4">
         <h3 className="font-semibold text-slate-800 mb-3">
           Current Teaching Courses
         </h3>
@@ -78,7 +80,7 @@ export default function Dashboard({ user }: { user: Lecturer }) {
             No teaching assignments for the selected semester.
           </p>
         )}
-      </Card>
+      </Card>}
     </div>
   )
 }

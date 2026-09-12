@@ -302,7 +302,7 @@ function SidebarContent({
 }: {
   nav: NavItem[]
   onClose?: () => void
-  onLogout: () => void
+  onLogout: () => void | Promise<void>
 }) {
   return (
     <div className="flex flex-col h-full">
@@ -361,7 +361,7 @@ function SidebarContent({
 
 interface LayoutProps {
   user: AuthUser
-  onLogout: () => void
+  onLogout: () => void | Promise<void>
   children: React.ReactNode
 }
 
@@ -370,8 +370,8 @@ export default function Layout({ user, onLogout, children }: LayoutProps) {
   const navigate = useNavigate()
   const nav = getNav(user?.role ?? "student")
 
-  const handleLogout = () => {
-    onLogout()
+  const handleLogout = async () => {
+    await onLogout()
     navigate("/login")
   }
 

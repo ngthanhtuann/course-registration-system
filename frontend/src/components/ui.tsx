@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import React, { useEffect, useRef, useState } from "react"
 
 // ── Badge ──────────────────────────────────────────────────────────────────
 const BADGE_VARIANTS: Record<string, string> = {
@@ -344,7 +344,7 @@ export function Modal({
 interface ConfirmDialogProps {
   open: boolean
   onClose: () => void
-  onConfirm: () => void
+  onConfirm: () => void | boolean | Promise<void | boolean>
   title: string
   message: string
   confirmLabel?: string
@@ -360,30 +360,57 @@ export function ConfirmDialog({
   confirmLabel = "Confirm",
   variant = "danger",
 }: ConfirmDialogProps) {
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState("")
+  const inFlight = useRef(false)
+  useEffect(() => {
+    if (open) setError("")
+  }, [open])
+  const close = () => {
+    if (!inFlight.current) onClose()
+  }
+  const confirm = async () => {
+    if (inFlight.current) return
+    inFlight.current = true
+    setSubmitting(true)
+    setError("")
+    try {
+      const result = await onConfirm()
+      if (result === false) {
+        setError("The action failed. Check the error message and try again.")
+      } else {
+        onClose()
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to complete the action.")
+    } finally {
+      inFlight.current = false
+      setSubmitting(false)
+    }
+  }
   return (
     <Modal
       open={open}
-      onClose={onClose}
+      onClose={close}
       title={title}
       size="sm"
       footer={
         <>
-          <Button variant="secondary" onClick={onClose}>
+          <Button variant="secondary" onClick={close} disabled={submitting}>
             Cancel
           </Button>
           <Button
             variant={variant}
-            onClick={() => {
-              onConfirm()
-              onClose()
-            }}
+            onClick={confirm}
+            disabled={submitting}
           >
-            {confirmLabel}
+            {submitting ? "Processing…" : confirmLabel}
           </Button>
         </>
       }
     >
       <p className="text-sm text-slate-600">{message}</p>
+      {error && <Alert type="error" message={error} />}
     </Modal>
   )
 }
@@ -403,6 +430,7 @@ interface DataTableProps<T> {
   keyFn: (row: T) => string
   emptyText?: string
   loading?: boolean
+  error?: string
   mobileCard?: (row: T) => React.ReactNode
 }
 
@@ -412,8 +440,10 @@ export function DataTable<T>({
   keyFn,
   emptyText = "No records found.",
   loading,
+  error,
   mobileCard,
 }: DataTableProps<T>) {
+  if (error) return <div className="p-6"><Alert type="error" message={error} /></div>
   if (loading) {
     return (
       <div className="flex flex-col gap-3 p-6">

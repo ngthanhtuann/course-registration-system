@@ -1,6 +1,9 @@
 """API routes for Administrator functions."""
 
-from flask import Blueprint, request
+import csv
+from io import StringIO
+
+from flask import Blueprint, Response, request
 from utils.auth import require_auth, get_current_user
 from utils.http_support import api_response, read_json_object
 from models.admin import Administrator
@@ -295,6 +298,7 @@ def delete_period(period_id):
 
 
 @admin_bp.get("/registration-demand")
+@admin_bp.get("/registration-demand/report")
 @require_auth("admin")
 def registration_demand():
     """Aggregate registration demand by registration period and major."""
@@ -303,6 +307,25 @@ def registration_demand():
     query = request.args.to_dict()
 
     result = administrator.generateRegistrationDemandReport(query=query)
+    if isinstance(result, tuple):
+        return api_response(result)
+    if request.path.endswith("/report") or query.get("format") == "csv":
+        output = StringIO(newline="")
+        writer = csv.writer(output)
+        writer.writerow(["Course Code", "Course Name", "Credit", "Capacity", "Registered Students"])
+        for row in result:
+            cells = []
+            for field in ("course_code", "course_name", "credit", "max_capacity", "registered_students"):
+                value = row[field]
+                if isinstance(value, str) and value.lstrip().startswith(("=", "+", "-", "@", "\t", "\r", "\n")):
+                    value = "'" + value
+                cells.append(value)
+            writer.writerow(cells)
+        return Response(
+            "\ufeff" + output.getvalue(),
+            content_type="text/csv; charset=utf-8",
+            headers={"Content-Disposition": 'attachment; filename="registration-demand.csv"'},
+        )
     return api_response(result)
 
 

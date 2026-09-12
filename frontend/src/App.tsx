@@ -52,6 +52,45 @@ function ProtectedLayout({
   )
 }
 
+function normalizeAuthUser(full: any): AuthUser {
+  if (!full) return null
+
+  if (full.role === "student") {
+    return {
+      id: full.user_id,
+      username: full.username,
+      fullName: full.fullname,
+      email: full.email,
+      role: "student",
+      status: "Active",
+      studentId: full.student_id,
+      major: full.major_code,
+    }
+  }
+
+  if (full.role === "lecturer") {
+    return {
+      id: full.user_id,
+      username: full.username,
+      fullName: full.fullname,
+      email: full.email,
+      role: "lecturer",
+      status: "Active",
+      lecturerId: full.lecturer_id,
+      qualifications: full.qualifications || [],
+    }
+  }
+
+  return {
+    id: full.user_id,
+    username: full.username,
+    fullName: full.fullname,
+    email: full.email,
+    role: "admin",
+    status: "Active",
+  }
+}
+
 export default function App() {
   const [user, setUser] = useState<AuthUser>(() => getStoredUser<AuthUser>())
   const [checkingSession, setCheckingSession] = useState(true)
@@ -65,37 +104,7 @@ export default function App() {
       }
       try {
         const full = await api.me()
-        const normalized =
-          full.role === "student"
-            ? {
-                id: full.user_id,
-                username: full.username,
-                fullName: full.fullname,
-                email: full.email,
-                role: "student",
-                status: "Active",
-                studentId: full.student_id,
-                major: full.major_code,
-              }
-            : full.role === "lecturer"
-              ? {
-                  id: full.user_id,
-                  username: full.username,
-                  fullName: full.fullname,
-                  email: full.email,
-                  role: "lecturer",
-                  status: "Active",
-                  lecturerId: full.lecturer_id,
-                  qualifications: full.qualifications || [],
-                }
-              : {
-                  id: full.user_id,
-                  username: full.username,
-                  fullName: full.fullname,
-                  email: full.email,
-                  role: "admin",
-                  status: "Active",
-                }
+        const normalized = normalizeAuthUser(full)
         if (alive) {
           setUser(normalized as AuthUser)
           saveAuth(localStorage.getItem("crs_token") || "", normalized)
@@ -115,9 +124,23 @@ export default function App() {
     }
   }, [])
 
-  const handleLogout = () => {
-    clearAuth()
-    setUser(null)
+  const handleLogout = async () => {
+    try {
+      await api.logout()
+    } catch {
+      // Logout must still clear the local session if the backend is unavailable
+      // or the token has already expired/revoked.
+    } finally {
+      clearAuth()
+      setUser(null)
+    }
+  }
+
+  const handleUserUpdated = (rawUser: any) => {
+    const normalized = normalizeAuthUser(rawUser)
+    if (!normalized) return
+    setUser(normalized)
+    saveAuth(localStorage.getItem("crs_token") || "", normalized)
   }
   if (checkingSession)
     return (
@@ -175,7 +198,7 @@ export default function App() {
                 <Route
                   path="account"
                   element={
-                    <ManageAccount user={user} onLogout={handleLogout} />
+                    <ManageAccount user={user} onLogout={handleLogout} onUserUpdated={handleUserUpdated} />
                   }
                 />
                 <Route
@@ -210,7 +233,7 @@ export default function App() {
                 <Route
                   path="account"
                   element={
-                    <ManageAccount user={user} onLogout={handleLogout} />
+                    <ManageAccount user={user} onLogout={handleLogout} onUserUpdated={handleUserUpdated} />
                   }
                 />
                 <Route
@@ -257,7 +280,7 @@ export default function App() {
                 <Route
                   path="account"
                   element={
-                    <ManageAccount user={user} onLogout={handleLogout} />
+                    <ManageAccount user={user} onLogout={handleLogout} onUserUpdated={handleUserUpdated} />
                   }
                 />
                 <Route

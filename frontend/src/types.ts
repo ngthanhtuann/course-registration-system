@@ -47,6 +47,8 @@ export interface RegistrationPeriod {
   semesterId: string
   startDateTime: string
   endDateTime: string
+  dropStartDateTime: string
+  dropEndDateTime: string
   status: "Scheduled" | "Open" | "Closed"
   periodName?: string
 }

@@ -372,7 +372,7 @@ class Administrator(User):
         except psycopg2.IntegrityError:
             db.conn.rollback()
             return ({"error": "User data conflicts with an existing record"}, 409)
-        except Exception:
+        except psycopg2.Error:
             db.conn.rollback()
             raise
         finally:
@@ -502,7 +502,7 @@ class Administrator(User):
         except psycopg2.IntegrityError:
             db.conn.rollback()
             return ({"error": "User data conflicts with an existing record"}, 409)
-        except Exception:
+        except psycopg2.Error:
             db.conn.rollback()
             raise
         finally:
@@ -563,7 +563,7 @@ class Administrator(User):
         except psycopg2.IntegrityError:
             db.conn.rollback()
             return ({"error": "Major code already exists or data conflicts with existing records"}, 409)
-        except Exception:
+        except psycopg2.Error:
             db.conn.rollback()
             raise
         finally:
@@ -610,7 +610,7 @@ class Administrator(User):
         except psycopg2.IntegrityError:
             db.conn.rollback()
             return ({"error": "Major is still referenced by existing data"}, 409)
-        except Exception:
+        except psycopg2.Error:
             db.conn.rollback()
             raise
         finally:
@@ -669,7 +669,7 @@ class Administrator(User):
         except psycopg2.IntegrityError:
             db.conn.rollback()
             return ({"error": "Invalid prerequisite or duplicate course code"}, 409)
-        except Exception:
+        except psycopg2.Error:
             db.conn.rollback()
             raise
         finally:
@@ -726,10 +726,10 @@ class Administrator(User):
                 (course_name, credit, prerequisite, max_capacity, course_code),
             )
             return {"message": "Course updated successfully"}
-        except psycopg2.IntegrityError:
+        except (psycopg2.IntegrityError, psycopg2.errors.RaiseException):
             db.conn.rollback()
             return ({"error": "Invalid prerequisite or capacity below registered student count"}, 409)
-        except Exception:
+        except psycopg2.Error:
             db.conn.rollback()
             raise
         finally:
@@ -752,7 +752,7 @@ class Administrator(User):
         except psycopg2.IntegrityError:
             db.conn.rollback()
             return ({"error": "Course is still referenced by existing data"}, 409)
-        except Exception:
+        except psycopg2.Error:
             db.conn.rollback()
             raise
         finally:
@@ -812,7 +812,7 @@ class Administrator(User):
         except psycopg2.IntegrityError:
             db.conn.rollback()
             return ({"error": "Course already exists in this major or referenced data is invalid"}, 409)
-        except Exception:
+        except psycopg2.Error:
             db.conn.rollback()
             raise
         finally:
@@ -915,7 +915,7 @@ class Administrator(User):
         except psycopg2.IntegrityError:
             db.conn.rollback()
             return ({"error": "Semester data conflicts with an existing record"}, 409)
-        except Exception:
+        except psycopg2.Error:
             db.conn.rollback()
             raise
         finally:
@@ -970,7 +970,7 @@ class Administrator(User):
         except psycopg2.IntegrityError:
             db.conn.rollback()
             return ({"error": "Semester data conflicts with existing records"}, 409)
-        except Exception:
+        except psycopg2.Error:
             db.conn.rollback()
             raise
         finally:
@@ -993,7 +993,7 @@ class Administrator(User):
         except psycopg2.IntegrityError:
             db.conn.rollback()
             return ({"error": "Semester is still referenced"}, 409)
-        except Exception:
+        except psycopg2.Error:
             db.conn.rollback()
             raise
         finally:
@@ -1013,7 +1013,12 @@ class Administrator(User):
                     when current_date <= rp.end_date
                         then 'open'
                     else 'closed'
-                end as current_status
+                end as current_status,
+                case
+                    when current_date < rp.drop_start_date then 'upcoming'
+                    when current_date <= rp.drop_end_date then 'open'
+                    else 'closed'
+                end as current_drop_status
             from registration_periods rp
             join semesters s
                 on s.semester_id = rp.semester_id
@@ -1032,11 +1037,15 @@ class Administrator(User):
             period_name = _optional_text(data.get("period_name"), "Period name") or "Registration Period"
             start_date = _parse_iso_date(data.get("start_date"), "Start date").isoformat()
             end_date = _parse_iso_date(data.get("end_date"), "End date").isoformat()
+            drop_start_date = _parse_iso_date(data.get("drop_start_date"), "Drop start date").isoformat()
+            drop_end_date = _parse_iso_date(data.get("drop_end_date"), "Drop end date").isoformat()
         except ValueError as exc:
             return ({"error": str(exc)}, 400)
 
         if start_date >= end_date:
             return ({"error": "Start date must be earlier than end date"}, 400)
+        if drop_start_date >= drop_end_date:
+            return ({"error": "Drop start date must be earlier than drop end date"}, 400)
 
         db = get_db()
         try:
@@ -1049,6 +1058,8 @@ class Administrator(User):
 
             if start_date < str(semester["start_date"]) or end_date > str(semester["end_date"]):
                 return ({"error": "Registration period must fall within the semester"}, 400)
+            if drop_start_date < str(semester["start_date"]) or drop_end_date > str(semester["end_date"]):
+                return ({"error": "Drop period must fall within the semester"}, 400)
 
             db.execute_query(
                 """
@@ -1056,13 +1067,13 @@ class Administrator(User):
                 (period_id, semester_id, period_name, start_date, end_date, drop_start_date, drop_end_date)
                 values (%s, %s, %s, %s, %s, %s, %s)
                 """,
-                (period_id, semester_id, period_name, start_date, end_date, start_date, end_date),
+                (period_id, semester_id, period_name, start_date, end_date, drop_start_date, drop_end_date),
             )
             return ({"message": "Registration period created successfully"}, 201)
         except psycopg2.IntegrityError:
             db.conn.rollback()
             return ({"error": "Registration period conflicts with existing data"}, 409)
-        except Exception:
+        except psycopg2.Error:
             db.conn.rollback()
             raise
         finally:
@@ -1076,20 +1087,28 @@ class Administrator(User):
             period_name = _optional_text(data.get("period_name"), "Period name") or "Registration Period"
             start_date = _parse_iso_date(data.get("start_date"), "Start date").isoformat()
             end_date = _parse_iso_date(data.get("end_date"), "End date").isoformat()
+            drop_start_date = _parse_iso_date(data.get("drop_start_date"), "Drop start date").isoformat()
+            drop_end_date = _parse_iso_date(data.get("drop_end_date"), "Drop end date").isoformat()
         except ValueError as exc:
             return ({"error": str(exc)}, 400)
 
         if start_date >= end_date:
             return ({"error": "Start date must be earlier than end date"}, 400)
+        if drop_start_date >= drop_end_date:
+            return ({"error": "Drop start date must be earlier than drop end date"}, 400)
 
         db = get_db()
         try:
             current = db.fetch_one(
-                "select period_id from registration_periods where period_id=%s",
+                "select period_id, semester_id from registration_periods where period_id=%s for update",
                 (period_id,),
             )
             if not current:
                 return ({"error": "Registration period not found"}, 404)
+            if current["semester_id"] != semester_id and db.fetch_one(
+                "select 1 from registrations where period_id=%s limit 1", (period_id,)
+            ):
+                return ({"error": "A period with registrations cannot move to another semester"}, 409)
 
             semester = db.fetch_one(
                 "select start_date, end_date from semesters where semester_id = %s",
@@ -1100,6 +1119,8 @@ class Administrator(User):
 
             if start_date < str(semester["start_date"]) or end_date > str(semester["end_date"]):
                 return ({"error": "Registration period must fall within the semester"}, 400)
+            if drop_start_date < str(semester["start_date"]) or drop_end_date > str(semester["end_date"]):
+                return ({"error": "Drop period must fall within the semester"}, 400)
 
             affected = db.execute_query(
                 """
@@ -1112,7 +1133,7 @@ class Administrator(User):
                     drop_end_date = %s
                 where period_id = %s
                 """,
-                (semester_id, period_name, start_date, end_date, start_date, end_date, period_id),
+                (semester_id, period_name, start_date, end_date, drop_start_date, drop_end_date, period_id),
             )
             if affected == 0:
                 return ({"error": "Registration period not found"}, 404)
@@ -1120,7 +1141,7 @@ class Administrator(User):
         except psycopg2.IntegrityError:
             db.conn.rollback()
             return ({"error": "Registration period conflicts with existing data"}, 409)
-        except Exception:
+        except psycopg2.Error:
             db.conn.rollback()
             raise
         finally:
@@ -1143,7 +1164,7 @@ class Administrator(User):
         except psycopg2.IntegrityError:
             db.conn.rollback()
             return ({"error": "Registration period is still referenced"}, 409)
-        except Exception:
+        except psycopg2.Error:
             db.conn.rollback()
             raise
         finally:
@@ -1153,15 +1174,26 @@ class Administrator(User):
         """Get registration demand for courses."""
         period_id = query.get("period_id")
         major_code = query.get("major_code") or None
+        search = query.get("search", "").strip()
         if not period_id:
             return ({"error": "period_id is required"}, 400)
         db = get_db()
         try:
+            if not db.fetch_one(
+                "select period_id from registration_periods where period_id=%s", (period_id,)
+            ):
+                return ({"error": "Registration period not found"}, 404)
+            if major_code and not db.fetch_one(
+                "select major_code from majors where major_code=%s", (major_code,)
+            ):
+                return ({"error": "Major not found"}, 404)
             demand = db.fetch_all(
                 """
             select
                 c.course_code,
                 c.course_name,
+                c.credit,
+                c.max_capacity,
                 count(distinct r.registration_id)
                 filter (
                     where r.registration_status = 'registered'
@@ -1176,10 +1208,11 @@ class Administrator(User):
             left join students s
                 on s.student_id = r.student_id
             where (%s is null or cu.major_code = %s)
-            group by c.course_code, c.course_name
+              and (c.course_code ilike %s or c.course_name ilike %s)
+            group by c.course_code, c.course_name, c.credit, c.max_capacity
             order by c.course_code
         """,
-                (major_code, major_code, period_id, major_code, major_code),
+                (major_code, major_code, period_id, major_code, major_code, f"%{search}%", f"%{search}%"),
             )
             return demand
         finally:
@@ -1193,6 +1226,17 @@ class Administrator(User):
             return ({"error": "period_id is required"}, 400)
         db = get_db()
         try:
+            if not db.fetch_one(
+                "select period_id from registration_periods where period_id=%s", (period_id,)
+            ):
+                return ({"error": "Registration period not found"}, 404)
+            if not db.fetch_one(
+                "select 1 from courses c where c.course_code=%s and "
+                "(%s is null or exists (select 1 from curriculum cu "
+                "where cu.course_code=c.course_code and cu.major_code=%s))",
+                (course_code, major_code, major_code),
+            ):
+                return ({"error": "Course not found in the selected curriculum"}, 404)
             students = db.fetch_all(
                 """
             select
@@ -1316,7 +1360,7 @@ class Administrator(User):
         except psycopg2.IntegrityError:
             db.conn.rollback()
             return ({"error": "Invalid or duplicate qualification"}, 409)
-        except Exception:
+        except psycopg2.Error:
             db.conn.rollback()
             raise
         finally:
@@ -1352,11 +1396,17 @@ class Administrator(User):
             semester_id = _required_text(data.get("semester_id"), "Semester ID")
             lecturer_id = _required_text(data.get("lecturer_id"), "Lecturer ID")
             course_code = _required_text(data.get("course_code"), "Course code")
+            major_code = _required_text(data.get("major_code"), "Major code")
         except ValueError as exc:
             return ({"error": str(exc)}, 400)
 
         db = get_db()
         try:
+            if not db.fetch_one(
+                "select curriculum_id from curriculum where major_code=%s and course_code=%s for share",
+                (major_code, course_code),
+            ):
+                return ({"error": "Course does not belong to the selected major's curriculum"}, 400)
             assignment = TeachingAssignment(
                 assignment_id,
                 lecturer_id,
@@ -1371,7 +1421,7 @@ class Administrator(User):
         except psycopg2.IntegrityError:
             db.conn.rollback()
             return ({"error": "Invalid assignment or duplicate assignment"}, 409)
-        except Exception:
+        except psycopg2.Error:
             db.conn.rollback()
             raise
         finally:

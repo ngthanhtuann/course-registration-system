@@ -16,24 +16,34 @@ export default function DropCourse({ user: _user }: { user: Student }) {
   const [confirm, setConfirm] = useState<any>(null)
   const [msg, setMsg] = useState("")
   const [err, setErr] = useState("")
-  const load = () =>
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState("")
+  useEffect(() => {
+    let active = true
     api.student
       .registrations()
-      .then((r) => setRows(r.filter((x) => x.status === "Registered")))
-      .catch((e) => setErr(e.message))
-  useEffect(() => {
-    void load()
+      .then((r) => {
+        if (active) setRows(r.filter((x) => x.status === "Registered"))
+      })
+      .catch((e) => {
+        if (active) setLoadError(e.message || "Could not load registrations.")
+      })
+      .finally(() => { if (active) setLoading(false) })
+    return () => { active = false }
   }, [])
   const drop = async () => {
-    if (!confirm) return
+    if (!confirm) return false
+    setMsg("")
+    setErr("")
     try {
       await api.student.drop(confirm.registration_id)
+      setRows((current) => current.filter((r) => r.registration_id !== confirm.registration_id))
       setConfirm(null)
       setMsg("Course dropped successfully.")
-      load()
+      return true
     } catch (e: any) {
-      setConfirm(null)
-      setErr(e.message)
+      setErr(e.message || "Could not drop the course.")
+      return false
     }
   }
   const cols: Column<any>[] = [
@@ -44,6 +54,11 @@ export default function DropCourse({ user: _user }: { user: Student }) {
     },
     { key: "course_name", header: "Course Name" },
     { key: "credit", header: "Credits" },
+    {
+      key: "drop_start_date",
+      header: "Drop Period",
+      render: (r) => `${r.drop_start_date} → ${r.drop_end_date}`,
+    },
     {
       key: "status",
       header: "Status",
@@ -84,6 +99,8 @@ export default function DropCourse({ user: _user }: { user: Student }) {
         <DataTable
           columns={cols}
           rows={rows}
+          loading={loading}
+          error={loadError}
           keyFn={(r) => r.registration_id}
           emptyText="No active registrations."
         />

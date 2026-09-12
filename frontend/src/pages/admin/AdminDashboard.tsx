@@ -4,13 +4,15 @@ import { Card, StatCard, SectionHeader } from "../../components/ui"
 import { api } from "../../services/api"
 export default function AdminDashboard() {
   const nav = useNavigate()
-  const [d, setD] = useState<any>({})
+  const [d, setD] = useState<any>(null)
   const [error, setError] = useState("")
+  const [loading, setLoading] = useState(true)
   useEffect(() => {
     api.admin
       .dashboard()
       .then(setD)
       .catch((e) => setError(e.message))
+      .finally(() => setLoading(false))
   }, [])
   const links = [
     ["Manage Users", "/admin/users", "👤"],
@@ -25,13 +27,14 @@ export default function AdminDashboard() {
       <SectionHeader
         title="Admin Dashboard"
         subtitle={
-          d.active_semester
+          loading ? "Loading dashboard…" : error ? "Dashboard unavailable" : d?.active_semester
             ? `Active Semester: ${d.active_semester.semester_name}`
             : "No active semester"
         }
       />
       {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      {loading && <p role="status" className="mb-4 text-sm text-slate-500">Loading dashboard…</p>}
+      {!loading && !error && d && <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatCard
           label="Total Students"
           value={d.total_students ?? 0}
@@ -56,7 +59,7 @@ export default function AdminDashboard() {
           color="yellow"
           icon={<span>✓</span>}
         />
-      </div>
+      </div>}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {links.map(([label, path, icon]) => (
           <button

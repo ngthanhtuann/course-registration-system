@@ -25,6 +25,8 @@ const mapP = (x: any): RegistrationPeriod => ({
   semesterId: x.semester_id,
   startDateTime: String(x.start_date).slice(0, 10),
   endDateTime: String(x.end_date).slice(0, 10),
+  dropStartDateTime: String(x.drop_start_date).slice(0, 10),
+  dropEndDateTime: String(x.drop_end_date).slice(0, 10),
   status:
     x.current_status === "open"
       ? "Open"
@@ -42,42 +44,65 @@ export default function ManageRegistrationPeriod() {
     name: "Registration Period",
     start: "",
     end: "",
+    dropStart: "",
+    dropEnd: "",
   })
   const [edit, setEdit] = useState<string | null>(null)
   const [del, setDel] = useState<RegistrationPeriod | null>(null)
   const [msg, setMsg] = useState("")
   const [err, setErr] = useState("")
-  const load = () =>
-    Promise.all([api.admin.semesters(), api.admin.periods()])
-      .then(([s, p]) => {
-        setSems(s.map(mapS))
-        setRows(p.map(mapP))
-      })
-      .catch((e) => setErr(e.message))
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState("")
+  const [saving, setSaving] = useState(false)
+  const load = async () => {
+    setLoading(true)
+    setLoadError("")
+    try {
+      const [s, p] = await Promise.all([api.admin.semesters(), api.admin.periods()])
+      setSems(s.map(mapS))
+      setRows(p.map(mapP))
+    } catch (e: any) {
+      setLoadError(e.message)
+    } finally {
+      setLoading(false)
+    }
+  }
   useEffect(() => {
     void load()
   }, [])
   const save = async () => {
+    if (saving) return
+    setSaving(true)
     try {
       setErr("")
-      if (!selected || !form.start || !form.end)
-        throw new Error("Semester, start date and end date are required.")
+      if (!selected || !form.start || !form.end || !form.dropStart || !form.dropEnd)
+        throw new Error("Semester and all four registration/drop dates are required.")
+      if (form.start >= form.end || form.dropStart >= form.dropEnd)
+        throw new Error("Each end date must be after its corresponding start date.")
+      const semester = sems.find((s) => s.id === selected)
+      if (!semester || [form.start, form.end, form.dropStart, form.dropEnd].some(
+        (date) => date < semester.startDate || date > semester.endDate,
+      )) throw new Error("Registration and drop dates must be within the selected semester.")
       const p = {
         semester_id: selected,
         period_id: form.id || undefined,
         period_name: form.name || "Registration Period",
         start_date: form.start,
         end_date: form.end,
+        drop_start_date: form.dropStart,
+        drop_end_date: form.dropEnd,
       }
       if (edit) await api.admin.updatePeriod(edit, p)
       else await api.admin.createPeriod(p)
       setMsg("Registration period saved successfully.")
       setEdit(null)
       setSelected("")
-      setForm({ id: "", name: "Registration Period", start: "", end: "" })
+      setForm({ id: "", name: "Registration Period", start: "", end: "", dropStart: "", dropEnd: "" })
       load()
     } catch (e: any) {
       setErr(e.message)
+    } finally {
+      setSaving(false)
     }
   }
   const remove = async () => {
@@ -88,8 +113,8 @@ export default function ManageRegistrationPeriod() {
       setMsg("Registration period deleted.")
       load()
     } catch (e: any) {
-      setDel(null)
       setErr(e.message)
+      throw e
     }
   }
   const cols: Column<RegistrationPeriod>[] = [
@@ -104,8 +129,10 @@ export default function ManageRegistrationPeriod() {
       render: (r) =>
         sems.find((s) => s.id === r.semesterId)?.name || r.semesterId,
     },
-    { key: "startDateTime", header: "Start Date" },
-    { key: "endDateTime", header: "End Date" },
+    { key: "startDateTime", header: "Registration Start" },
+    { key: "endDateTime", header: "Registration End" },
+    { key: "dropStartDateTime", header: "Drop Start" },
+    { key: "dropEndDateTime", header: "Drop End" },
     {
       key: "status",
       header: "Status",
@@ -127,6 +154,8 @@ export default function ManageRegistrationPeriod() {
                 name: (r as any).periodName || "Registration Period",
                 start: r.startDateTime,
                 end: r.endDateTime,
+                dropStart: r.dropStartDateTime,
+                dropEnd: r.dropEndDateTime,
               })
             }}
           >
@@ -143,7 +172,7 @@ export default function ManageRegistrationPeriod() {
     <div>
       <SectionHeader
         title="Registration Period"
-        subtitle="Configure when students can register for courses"
+        subtitle="Configure separate course registration and drop periods"
       />
       <Card className="p-4 mb-5">
         <h3 className="font-semibold text-slate-800 mb-4">
@@ -170,20 +199,32 @@ export default function ManageRegistrationPeriod() {
             />
           )}
           <Input
-            label="Start Date"
+            label="Registration Start Date"
             type="date"
             value={form.start}
             onChange={(e) => setForm({ ...form, start: e.target.value })}
           />
           <Input
-            label="End Date"
+            label="Registration End Date"
             type="date"
             value={form.end}
             onChange={(e) => setForm({ ...form, end: e.target.value })}
           />
+          <Input
+            label="Drop Start Date"
+            type="date"
+            value={form.dropStart}
+            onChange={(e) => setForm({ ...form, dropStart: e.target.value })}
+          />
+          <Input
+            label="Drop End Date"
+            type="date"
+            value={form.dropEnd}
+            onChange={(e) => setForm({ ...form, dropEnd: e.target.value })}
+          />
         </div>
         <div className="mt-4 flex gap-2">
-          <Button onClick={save}>{edit ? "Update" : "Create"}</Button>
+          <Button disabled={saving || loading || !!loadError} onClick={save}>{saving ? "Saving…" : edit ? "Update" : "Create"}</Button>
           {edit && (
             <Button
               variant="secondary"
@@ -195,6 +236,8 @@ export default function ManageRegistrationPeriod() {
                   name: "Registration Period",
                   start: "",
                   end: "",
+    dropStart: "",
+    dropEnd: "",
                 })
               }}
             >
@@ -211,6 +254,8 @@ export default function ManageRegistrationPeriod() {
       )}
       <Card>
         <DataTable
+          loading={loading}
+          error={loadError}
           columns={cols}
           rows={rows}
           keyFn={(r) => r.id}

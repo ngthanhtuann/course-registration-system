@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Card, StatCard, SectionHeader, Badge } from "../../components/ui"
+import { Card, StatCard, SectionHeader, Badge, Alert } from "../../components/ui"
 import { api } from "../../services/api"
 import type { Student } from "../../types"
 export default function StudentDashboard({ user }: { user: Student }) {
@@ -8,18 +8,26 @@ export default function StudentDashboard({ user }: { user: Student }) {
   const [regs, setRegs] = useState<any[]>([])
   const [periods, setPeriods] = useState<any[]>([])
   const [curr, setCurr] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
   useEffect(() => {
+    let active = true
     Promise.all([
       api.student.registrations(),
       api.student.periods(),
       api.student.curriculum(),
     ])
       .then(([r, p, c]) => {
+        if (!active) return
         setRegs(r)
         setPeriods(p)
         setCurr(c)
       })
-      .catch(() => {})
+      .catch((e) => {
+        if (active) setError(e.message || "Could not load dashboard.")
+      })
+      .finally(() => { if (active) setLoading(false) })
+    return () => { active = false }
   }, [])
   const active = periods.find((p) => p.current_status === "open")
   const activeRegs = regs.filter((r) => r.status === "Registered")
@@ -29,6 +37,9 @@ export default function StudentDashboard({ user }: { user: Student }) {
         title="Student Dashboard"
         subtitle={`Welcome, ${user.fullName} · Major: ${user.major}`}
       />
+      {error && <div className="mb-4"><Alert type="error" message={error} /></div>}
+      {loading && <Card className="p-5 mb-4">Loading dashboard...</Card>}
+      {!loading && !error && <>
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         <StatCard
           label="Curriculum Courses"
@@ -62,6 +73,7 @@ export default function StudentDashboard({ user }: { user: Student }) {
           </div>
         )}
       </Card>
+      </>}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         {[
           ["View Courses", "/student/courses"],

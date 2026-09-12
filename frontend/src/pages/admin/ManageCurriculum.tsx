@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import {
   Card,
   Button,
@@ -21,6 +21,12 @@ export default function ManageCurriculum() {
   const [remove, setRemove] = useState<any>(null)
   const [msg, setMsg] = useState("")
   const [err, setErr] = useState("")
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState("")
+  const [itemsLoading, setItemsLoading] = useState(false)
+  const [itemsError, setItemsError] = useState("")
+  const [submitting, setSubmitting] = useState(false)
+  const itemRequest = useRef(0)
   useEffect(() => {
     Promise.all([api.admin.majors(), api.admin.courses()])
       .then(([m, c]) => {
@@ -37,27 +43,43 @@ export default function ManageCurriculum() {
           })),
         )
       })
-      .catch((e) => setErr(e.message))
+      .catch((e) => setLoadError(e.message))
+      .finally(() => setLoading(false))
   }, [])
-  const load = () =>
-    major &&
-    api.admin
-      .curriculum(major)
-      .then(setItems)
-      .catch((e) => setErr(e.message))
-  useEffect(() => {
-    if (major) {
-      void load()
+  const load = async () => {
+    const request = ++itemRequest.current
+    setItemsError("")
+    if (!major) {
+      setItems([])
+      setItemsLoading(false)
+      return
     }
+    setItemsLoading(true)
+    try {
+      const data = await api.admin.curriculum(major)
+      if (request === itemRequest.current) setItems(data)
+    } catch (e: any) {
+      if (request === itemRequest.current) setItemsError(e.message)
+    } finally {
+      if (request === itemRequest.current) setItemsLoading(false)
+    }
+  }
+  useEffect(() => {
+    setForm({ course: "", semester: "1" })
+    void load()
+    return () => { itemRequest.current += 1 }
   }, [major])
   const available = courses.filter(
     (c) => !items.some((i) => i.course_code === c.code),
   )
   const add = async () => {
+    if (submitting) return
     if (!major || !form.course) {
       setErr("Select a major and course.")
       return
     }
+    setSubmitting(true)
+    setErr("")
     try {
       await api.admin.addCurriculum({
         major_code: major,
@@ -66,21 +88,27 @@ export default function ManageCurriculum() {
       })
       setMsg("Course added to curriculum.")
       setForm({ course: "", semester: "1" })
-      load()
+      await load()
     } catch (e: any) {
       setErr(e.message)
+    } finally {
+      setSubmitting(false)
     }
   }
   const del = async () => {
-    if (!remove) return
+    if (!remove || submitting) return false
+    setSubmitting(true)
+    setErr("")
     try {
       await api.admin.deleteCurriculum(remove.curriculum_id)
       setRemove(null)
       setMsg("Course removed from curriculum.")
-      load()
+      await load()
     } catch (e: any) {
-      setRemove(null)
       setErr(e.message)
+      throw e
+    } finally {
+      setSubmitting(false)
     }
   }
   const cols: Column<any>[] = [
@@ -126,13 +154,14 @@ export default function ManageCurriculum() {
       <Card className="p-4 mb-4">
         <Select
           label="Major"
+          disabled={loading || !!loadError || submitting}
           options={majors.map((m) => ({ value: m.code, label: m.name }))}
           value={major}
           onChange={(e) => setMajor(e.target.value)}
           placeholder="Select major"
         />
       </Card>
-      {major && (
+      {major && !loading && !loadError && !itemsLoading && !itemsError && (
         <Card className="p-4 mb-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Select
@@ -153,13 +182,15 @@ export default function ManageCurriculum() {
               onChange={(e) => setForm({ ...form, semester: e.target.value })}
             />
             <div className="flex items-end">
-              <Button onClick={add}>+ Add to Curriculum</Button>
+              <Button disabled={submitting} onClick={add}>+ Add to Curriculum</Button>
             </div>
           </div>
         </Card>
       )}
       <Card>
         <DataTable
+          loading={loading || itemsLoading}
+          error={loadError || itemsError}
           columns={cols}
           rows={items}
           keyFn={(r) => r.curriculum_id}

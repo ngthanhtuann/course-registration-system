@@ -14,21 +14,37 @@ export default function ViewGrades({ user: _user }: { user: Student }) {
   const [sems, setSems] = useState<any[]>([])
   const [semester, setSemester] = useState("")
   const [rows, setRows] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
   useEffect(() => {
+    let active = true
     api.student
       .semesters()
       .then((s) => {
+        if (!active) return
         setSems(s)
         if (s[0]) setSemester(s[0].semester_id)
+        else setLoading(false)
       })
-      .catch(() => {})
+      .catch((e) => {
+        if (!active) return
+        setError(e.message || "Could not load semesters.")
+        setLoading(false)
+      })
+    return () => { active = false }
   }, [])
   useEffect(() => {
-    if (semester)
-      api.student
-        .grades(semester)
-        .then(setRows)
-        .catch(() => setRows([]))
+    if (!semester) return
+    let active = true
+    setLoading(true)
+    setError("")
+    api.student.grades(semester)
+      .then((data) => { if (active) setRows(data) })
+      .catch((e) => {
+        if (active) setError(e.message || "Could not load grades.")
+      })
+      .finally(() => { if (active) setLoading(false) })
+    return () => { active = false }
   }, [semester])
   const passed = rows.filter((r) => r.result_status === "passed")
   const graded = rows.filter((r) => r.grade !== null)
@@ -79,10 +95,15 @@ export default function ViewGrades({ user: _user }: { user: Student }) {
             label: s.semester_name,
           }))}
           value={semester}
-          onChange={(e) => setSemester(e.target.value)}
+          onChange={(e) => {
+            setSemester(e.target.value)
+            setRows([])
+            setLoading(!!e.target.value)
+            setError("")
+          }}
         />
       </Card>
-      <div className="grid grid-cols-3 gap-4 mb-4">
+      {!loading && !error && <div className="grid grid-cols-3 gap-4 mb-4">
         <StatCard
           label="Courses Passed"
           value={passed.length}
@@ -101,11 +122,13 @@ export default function ViewGrades({ user: _user }: { user: Student }) {
           color="purple"
           icon={<span>★</span>}
         />
-      </div>
+      </div>}
       <Card>
         <DataTable
           columns={cols}
           rows={rows}
+          loading={loading}
+          error={error}
           keyFn={(r) => r.course_code}
           emptyText="No grades available for this semester."
         />

@@ -24,6 +24,10 @@ export default function ManageStudentGrades({
   const [msg, setMsg] = useState("")
   const [err, setErr] = useState("")
   const [saving, setSaving] = useState(false)
+  const [semestersLoading, setSemestersLoading] = useState(true)
+  const [coursesLoading, setCoursesLoading] = useState(false)
+  const [studentsLoading, setStudentsLoading] = useState(false)
+  const [loadError, setLoadError] = useState("")
   useEffect(() => {
     let active = true
     api.lecturer
@@ -31,11 +35,13 @@ export default function ManageStudentGrades({
       .then((s) => {
         if (!active) return
         setSems(s)
+        setCoursesLoading(!!s[0])
         if (s[0]) setSemester(s[0].semester_id)
       })
       .catch((e) => {
-        if (active) setErr(e.message)
+        if (active) setLoadError(e.message || "Could not load semesters.")
       })
+      .finally(() => { if (active) setSemestersLoading(false) })
     return () => {
       active = false
     }
@@ -46,16 +52,20 @@ export default function ManageStudentGrades({
     setRows([])
     if (!semester) return
     let active = true
+    setCoursesLoading(true)
+    setLoadError("")
     api.lecturer
       .teachingCourses(semester)
       .then((c) => {
         if (!active) return
         setCourses(c)
+        setStudentsLoading(!!c[0])
         setCourse(c[0]?.course_code || "")
       })
       .catch((e) => {
-        if (active) setErr(e.message)
+        if (active) setLoadError(e.message || "Could not load teaching courses.")
       })
+      .finally(() => { if (active) setCoursesLoading(false) })
     return () => {
       active = false
     }
@@ -66,14 +76,17 @@ export default function ManageStudentGrades({
     setErr("")
     if (!semester || !course) return
     let active = true
+    setStudentsLoading(true)
+    setLoadError("")
     api.lecturer
       .students(course, semester)
       .then((students) => {
         if (active) setRows(students)
       })
       .catch((e) => {
-        if (active) setErr(e.message)
+        if (active) setLoadError(e.message || "Could not load registered students.")
       })
+      .finally(() => { if (active) setStudentsLoading(false) })
     return () => {
       // Ignore old results when the selected course changes.
       active = false
@@ -189,12 +202,15 @@ export default function ManageStudentGrades({
               label: s.semester_name,
             }))}
             value={semester}
-            disabled={saving}
+            disabled={saving || semestersLoading}
             onChange={(e) => {
               setSemester(e.target.value)
               setCourses([])
               setCourse("")
               setRows([])
+              setCoursesLoading(!!e.target.value)
+              setStudentsLoading(false)
+              setLoadError("")
             }}
           />
           <Select
@@ -204,10 +220,12 @@ export default function ManageStudentGrades({
               label: `${c.course_code} — ${c.course_name}`,
             }))}
             value={course}
-            disabled={saving}
+            disabled={saving || semestersLoading || coursesLoading}
             onChange={(e) => {
               setCourse(e.target.value)
               setRows([])
+              setStudentsLoading(!!e.target.value)
+              setLoadError("")
             }}
             placeholder="Select course"
           />
@@ -217,6 +235,8 @@ export default function ManageStudentGrades({
         <DataTable
           columns={cols}
           rows={rows}
+          loading={semestersLoading || coursesLoading || studentsLoading}
+          error={loadError}
           keyFn={(r) => r.registration_id}
           emptyText="No registered students."
         />

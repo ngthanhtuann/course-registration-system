@@ -14,8 +14,16 @@ def get_current_user():
         return None
     try:
         payload = jwt.decode(
-            header.split(" ", 1)[1], JWT_SECRET, algorithms=[JWT_ALGORITHM]
+            header.split(" ", 1)[1], JWT_SECRET, algorithms=[JWT_ALGORITHM],
+            options={"require": ["exp", "user_id", "username", "role", "token_version"]},
         )
+        if (
+            not all(isinstance(payload.get(key), str) and payload[key]
+                    for key in ("user_id", "username", "role"))
+            or type(payload.get("token_version")) is not int
+            or payload["token_version"] < 0
+        ):
+            return None
         return payload
     except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
         return None
@@ -38,11 +46,14 @@ def require_auth(*roles):
             db = get_db()
             try:
                 active = db.fetch_one(
-                    "select active_status from users where user_id=%s",
+                    "select active_status, token_version, role from users where user_id=%s",
                     (user["user_id"],),
                 )
                 if not active or not active.get("active_status", True):
                     return (jsonify({"error": "account is inactive"}), 403)
+                if (active["token_version"] != user["token_version"]
+                        or active["role"] != user["role"]):
+                    return (jsonify({"error": "session has been revoked; please log in again"}), 401)
             finally:
                 db.close()
             return fn(*args, **kwargs)

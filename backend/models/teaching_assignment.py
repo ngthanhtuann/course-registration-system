@@ -17,8 +17,11 @@ class TeachingAssignment:
     def isQualified(self, db):
         """Check whether the lecturer can teach the course."""
         qualification = db.fetch_one(
-            "select 1 from lecturer_qualifications "
-            "where lecturer_id=%s and course_code=%s",
+            "select 1 from lecturer_qualifications q "
+            "join lecturers l on l.lecturer_id=q.lecturer_id "
+            "join users u on u.user_id=l.user_id "
+            "where q.lecturer_id=%s and q.course_code=%s and u.active_status=true "
+            "for share of q, u",
             (self.lecturerId, self.courseCode),
         )
         if qualification:

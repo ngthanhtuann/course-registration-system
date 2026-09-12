@@ -20,6 +20,8 @@ export default function CourseRegistration({ user }: Props) {
   const [confirm, setConfirm] = useState<any>(null)
   const [msg, setMsg] = useState("")
   const [err, setErr] = useState("")
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState("")
   useEffect(() => {
     let active = true
     api.student
@@ -28,9 +30,12 @@ export default function CourseRegistration({ user }: Props) {
         if (!active) return
         const open = periods.find((p) => p.current_status === "open")
         setPeriod(open || periods[0] || null)
+        if (!periods.length) setLoading(false)
       })
       .catch((e) => {
-        if (active) setErr(e.message)
+        if (!active) return
+        setLoadError(e.message || "Could not load registration periods.")
+        setLoading(false)
       })
     return () => {
       active = false
@@ -40,28 +45,34 @@ export default function CourseRegistration({ user }: Props) {
     setRows([])
     if (!period) return
     let active = true
+    setLoading(true)
+    setLoadError("")
     api.student
       .courses(period.period_id)
       .then((courses) => {
         if (active) setRows(courses)
       })
       .catch((e) => {
-        if (active) setErr(e.message)
+        if (active) setLoadError(e.message || "Could not load courses.")
       })
+      .finally(() => { if (active) setLoading(false) })
     return () => {
       active = false
     }
   }, [period])
   const register = async () => {
-    if (!confirm || !period) return
+    if (!confirm || !period) return false
+    setMsg("")
+    setErr("")
     try {
       await api.student.register(confirm.course_code, period.period_id)
       setMsg("Course registered successfully.")
+      setRows((current) => current.filter((r) => r.course_code !== confirm.course_code))
       setConfirm(null)
-      setRows(await api.student.courses(period.period_id))
+      return true
     } catch (e: any) {
-      setErr(e.message)
-      setConfirm(null)
+      setErr(e.message || "Could not register for the course.")
+      return false
     }
   }
   const cols: Column<any>[] = [
@@ -163,6 +174,8 @@ export default function CourseRegistration({ user }: Props) {
         <DataTable
           columns={cols}
           rows={rows}
+          loading={loading}
+          error={loadError}
           keyFn={(r) => r.course_code}
           emptyText="No courses available for registration."
         />

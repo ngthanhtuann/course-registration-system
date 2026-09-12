@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import {
   Card,
@@ -28,8 +28,16 @@ export default function ManageRegistrationDemand() {
   const [rows, setRows] = useState<any[]>([])
   const [students, setStudents] = useState<any[]>([])
 
-  const [msg] = useState("")
+  const [msg, setMsg] = useState("")
   const [err, setErr] = useState("")
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState("")
+  const [demandLoading, setDemandLoading] = useState(false)
+  const [demandError, setDemandError] = useState("")
+  const [studentsLoading, setStudentsLoading] = useState(false)
+  const [studentsError, setStudentsError] = useState("")
+  const [exporting, setExporting] = useState(false)
+  const studentRequest = useRef(0)
 
 
   // =========================================================
@@ -46,8 +54,9 @@ export default function ManageRegistrationDemand() {
         setMajors(m)
       })
       .catch((e) => {
-        setErr(e.message)
+        setLoadError(e.message)
       })
+      .finally(() => setLoading(false))
   }, [])
 
 
@@ -56,51 +65,71 @@ export default function ManageRegistrationDemand() {
   // =========================================================
 
   useEffect(() => {
+    let active = true
+    studentRequest.current += 1
+    setCourse("")
+    setDemandError("")
     if (!period) {
       setRows([])
+      setDemandLoading(false)
       return
     }
-
-    setErr("")
-
+    setDemandLoading(true)
     api.admin
       .demand(period, major)
       .then((data) => {
-        setRows(data)
+        if (active) setRows(data)
       })
       .catch((e) => {
-        setErr(e.message)
+        if (active) setDemandError(e.message)
       })
+      .finally(() => {
+        if (active) setDemandLoading(false)
+      })
+    return () => { active = false }
   }, [period, major])
-
 
   // =========================================================
   // VIEW STUDENTS
   // =========================================================
 
   const view = async (code: string) => {
+    const request = ++studentRequest.current
+    setCourse(code)
+    setStudentsError("")
+    setStudentsLoading(true)
     try {
-      setErr("")
-
-      setCourse(code)
-
-      const data =
-        await api.admin.demandStudents(
-          code,
-          period,
-          major,
-        )
-
-      setStudents(data)
-
+      const data = await api.admin.demandStudents(code, period, major)
+      if (request === studentRequest.current) setStudents(data)
     } catch (e: any) {
-      setErr(
-        e?.message ||
-          "Could not load registered students.",
-      )
+      if (request === studentRequest.current)
+        setStudentsError(e?.message || "Could not load registered students.")
+    } finally {
+      if (request === studentRequest.current) setStudentsLoading(false)
     }
   }
-
+  const exportReport = async () => {
+    if (!period || exporting) return
+    setExporting(true)
+    setErr("")
+    setMsg("")
+    try {
+      const report = await api.admin.demandReport(period, major)
+      const url = URL.createObjectURL(report)
+      const link = document.createElement("a")
+      link.href = url
+      link.download = "registration-demand.csv"
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000)
+      setMsg("Demand report generated successfully.")
+    } catch (e: any) {
+      setErr(e.message || "Could not generate the demand report.")
+    } finally {
+      setExporting(false)
+    }
+  }
 
   // =========================================================
   // TABLE
@@ -163,6 +192,7 @@ export default function ManageRegistrationDemand() {
 
           <Select
             label="Registration Period"
+            disabled={loading || !!loadError || exporting}
             options={periods.map((p) => ({
               value: p.period_id,
 
@@ -178,6 +208,7 @@ export default function ManageRegistrationDemand() {
 
           <Select
             label="Major"
+            disabled={loading || !!loadError || exporting}
             options={majors.map((m) => ({
               value: m.major_code,
               label: m.major_name,
@@ -190,6 +221,9 @@ export default function ManageRegistrationDemand() {
           />
 
         </div>
+        <Button className="mt-4" onClick={exportReport} disabled={!period || loading || demandLoading || !!loadError || !!demandError || exporting}>
+          {exporting ? "Generating…" : "Generate Demand Report (CSV)"}
+        </Button>
       </Card>
 
 
@@ -213,12 +247,14 @@ export default function ManageRegistrationDemand() {
 
       <Card>
         <DataTable
+          loading={loading || demandLoading}
+          error={loadError || demandError}
           columns={cols}
           rows={rows}
           keyFn={(r) =>
             r.course_code
           }
-          emptyText="No registration demand found."
+          emptyText={period ? "No registration demand found." : "Select a registration period to view demand."}
         />
       </Card>
 
@@ -226,6 +262,7 @@ export default function ManageRegistrationDemand() {
       <Modal
         open={!!course}
         onClose={() => {
+          studentRequest.current += 1
           setCourse("")
           setStudents([])
         }}
@@ -235,6 +272,7 @@ export default function ManageRegistrationDemand() {
           <Button
             variant="secondary"
             onClick={() => {
+              studentRequest.current += 1
               setCourse("")
               setStudents([])
             }}
@@ -245,6 +283,8 @@ export default function ManageRegistrationDemand() {
       >
 
         <DataTable
+          loading={studentsLoading}
+          error={studentsError}
           columns={[
             {
               key: "student_id",

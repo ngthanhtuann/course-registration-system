@@ -87,6 +87,46 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   return data as T
 }
 
+async function requestBlob(path: string, options: RequestInit = {}): Promise<Blob> {
+  const headers = new Headers(options.headers)
+  headers.set("Accept", "text/csv, application/octet-stream, */*")
+
+  if (options.body && !headers.has("Content-Type"))
+    headers.set("Content-Type", "application/json")
+
+  const token = getToken()
+  if (token) headers.set("Authorization", `Bearer ${token}`)
+
+  let response: Response
+  try {
+    response = await fetch(`${API_URL}${path}`, { ...options, headers })
+  } catch {
+    throw new ApiError(
+      `Cannot connect to backend${API_URL ? ` at ${API_URL}` : ""}. Make sure the Flask server is running.`,
+      0,
+    )
+  }
+
+  if (!response.ok) {
+    const text = await response.text()
+    let data: any = null
+    if (text) {
+      try {
+        data = JSON.parse(text)
+      } catch {
+        data = null
+      }
+    }
+    if (response.status === 401) clearAuth()
+    throw new ApiError(
+      data?.error || data?.message || `Request failed (${response.status})`,
+      response.status,
+    )
+  }
+
+  return response.blob()
+}
+
 export const api = {
   login: (username: string, password: string) =>
     request<{
@@ -98,6 +138,11 @@ export const api = {
     }),
 
   me: () => request<any>("/api/me"),
+
+  logout: () =>
+    request<any>("/api/logout", {
+      method: "POST",
+    }),
 
   updateProfile: (fullname: string, email: string) =>
     request<any>("/api/account/profile", {
@@ -240,6 +285,13 @@ export const api = {
     demandStudents: (courseCode: string, periodId: string, majorCode = "") =>
       request<any[]>(
         `/api/admin/registration-demand/${encodeURIComponent(courseCode)}/students?period_id=${encodeURIComponent(periodId)}${
+          majorCode ? `&major_code=${encodeURIComponent(majorCode)}` : ""
+        }`,
+      ),
+
+    demandReport: (periodId: string, majorCode = "") =>
+      requestBlob(
+        `/api/admin/registration-demand/report?period_id=${encodeURIComponent(periodId)}${
           majorCode ? `&major_code=${encodeURIComponent(majorCode)}` : ""
         }`,
       ),

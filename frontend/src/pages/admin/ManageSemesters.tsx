@@ -32,11 +32,20 @@ export default function ManageSemester() {
   const [form, setForm] = useState({ id: "", name: "", start: "", end: "" })
   const [msg, setMsg] = useState("")
   const [err, setErr] = useState("")
-  const load = () =>
-    api.admin
-      .semesters()
-      .then((x) => setRows(x.map(map)))
-      .catch((e) => setErr(e.message))
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState("")
+  const load = async () => {
+    setLoading(true)
+    setLoadError("")
+    try {
+      const x = await api.admin.semesters()
+      setRows(x.map(map))
+    } catch (e: any) {
+      setLoadError(e.message)
+    } finally {
+      setLoading(false)
+    }
+  }
   useEffect(() => {
     void load()
   }, [])
@@ -73,8 +82,8 @@ export default function ManageSemester() {
       setMsg("Semester deleted successfully.")
       load()
     } catch (e: any) {
-      setDel(null)
       setErr(e.message)
+      throw e
     }
   }
   const cols: Column<Semester>[] = [
@@ -148,6 +157,8 @@ export default function ManageSemester() {
       )}
       <Card className="mt-4">
         <DataTable
+          loading={loading}
+          error={loadError}
           columns={cols}
           rows={rows}
           keyFn={(r) => r.id}

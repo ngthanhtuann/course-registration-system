@@ -2,6 +2,7 @@
 
 from database import get_db
 from utils.password import hash_password, check_password, make_token
+import psycopg2
 import re
 
 _EMAIL_PATTERN = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
@@ -89,6 +90,10 @@ class User:
                 u.email,
                 lower(u.role::text) as role,
                 u.active_status,
+                u.failed_login_attempts,
+                u.locked_until,
+                coalesce(u.locked_until > clock_timestamp(), false) as is_locked,
+                u.token_version,
                 s.student_id,
                 s.major_code,
                 l.lecturer_id,
@@ -141,7 +146,15 @@ class User:
 
         db = get_db()
         try:
+            # Serialize attempts for one account, including concurrent requests.
+            db.fetch_one(
+                "select user_id from users where username = %s for update",
+                (username,),
+            )
             user = self._loadLoginUser(db, username)
+            if user and user["is_locked"]:
+                return ({"error": "account locked for 15 minutes after 5 failed login attempts"}, 423)
+
             valid_password = False
 
             if user:
@@ -155,15 +168,40 @@ class User:
                 or not user.get("active_status", True)
                 or not valid_password
             ):
+                if user and user.get("active_status", True):
+                    attempts = (0 if user["locked_until"] is not None
+                                else user["failed_login_attempts"]) + 1
+                    db.execute(
+                        """
+                        update users
+                        set failed_login_attempts = %s,
+                            locked_until = case when %s >= 5
+                                then clock_timestamp() + interval '15 minutes'
+                                else null end
+                        where user_id = %s
+                        """,
+                        (attempts, attempts, user["user_id"]),
+                    )
+                    db.conn.commit()
+                    if attempts >= 5:
+                        return ({"error": "account locked for 15 minutes after 5 failed login attempts"}, 423)
                 return ({"error": "invalid username or password"}, 401)
 
+            db.execute(
+                "update users set failed_login_attempts = 0, locked_until = null where user_id = %s",
+                (user["user_id"],),
+            )
             token = make_token(user)
+            db.conn.commit()
             self._loadAccount(user)
 
             return {
                 "token": token,
                 "user": self._authUserPayload(user),
             }
+        except psycopg2.Error:
+            db.conn.rollback()
+            raise
         finally:
             db.close()
 
@@ -257,21 +295,16 @@ class User:
                 ),
             )
 
+            updated = self._loadLoginUser(db, user["username"])
             db.conn.commit()
-
-            self._loadAccount(
-                {
-                    "full_name": fullname,
-                    "fullname": fullname,
-                    "email": email,
-                }
-            )
+            self._loadAccount(updated)
 
             return {
-                "message": "profile updated successfully"
+                "message": "profile updated successfully",
+                "user": self._authUserPayload(updated),
             }
 
-        except Exception:
+        except psycopg2.Error:
             db.conn.rollback()
             raise
 
@@ -359,7 +392,7 @@ class User:
                 "message": "password changed successfully"
             }
 
-        except Exception:
+        except psycopg2.Error:
             db.conn.rollback()
             raise
 
@@ -367,7 +400,23 @@ class User:
             db.close()
 
     def logout(self):
-        """Return a logout success message."""
+        """Invalidate existing account tokens before completing logout."""
+
+        db = get_db()
+        try:
+            db.execute(
+                """
+                update users set token_version = token_version + 1
+                where user_id = %s and token_version = %s
+                """,
+                (self.userId, self.identity["token_version"]),
+            )
+            db.conn.commit()
+        except psycopg2.Error:
+            db.conn.rollback()
+            raise
+        finally:
+            db.close()
 
         self.identity.clear()
 

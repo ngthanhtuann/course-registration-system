@@ -6,6 +6,7 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from psycopg2.pool import ThreadedConnectionPool, PoolError
 from dotenv import load_dotenv
+from flask import g, has_request_context
 
 
 # ============================================================

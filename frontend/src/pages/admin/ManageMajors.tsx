@@ -20,13 +20,20 @@ export default function ManageMajor() {
   const [del, setDel] = useState<Major | null>(null)
   const [msg, setMsg] = useState("")
   const [err, setErr] = useState("")
-  const load = () =>
-    api.admin
-      .majors()
-      .then((x) =>
-        setRows(x.map((m) => ({ code: m.major_code, name: m.major_name }))),
-      )
-      .catch((e) => setErr(e.message))
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState("")
+  const load = async () => {
+    setLoading(true)
+    setLoadError("")
+    try {
+      const x = await api.admin.majors()
+      setRows(x.map((m) => ({ code: m.major_code, name: m.major_name })))
+    } catch (e: any) {
+      setLoadError(e.message)
+    } finally {
+      setLoading(false)
+    }
+  }
   useEffect(() => {
     void load()
   }, [])
@@ -59,8 +66,8 @@ export default function ManageMajor() {
       setMsg("Major deleted successfully.")
       load()
     } catch (e: any) {
-      setDel(null)
       setErr(e.message)
+      throw e
     }
   }
   const cols: Column<Major>[] = [
@@ -132,6 +139,8 @@ export default function ManageMajor() {
       )}
       <Card className="mt-4">
         <DataTable
+          loading={loading}
+          error={loadError}
           columns={cols}
           rows={rows}
           keyFn={(r) => r.code}

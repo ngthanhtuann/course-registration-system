@@ -36,11 +36,20 @@ export default function ManageCourse() {
   })
   const [msg, setMsg] = useState("")
   const [err, setErr] = useState("")
-  const load = () =>
-    api.admin
-      .courses()
-      .then((x) => setCourses(x.map(map)))
-      .catch((e) => setErr(e.message))
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState("")
+  const load = async () => {
+    setLoading(true)
+    setLoadError("")
+    try {
+      const x = await api.admin.courses()
+      setCourses(x.map(map))
+    } catch (e: any) {
+      setLoadError(e.message)
+    } finally {
+      setLoading(false)
+    }
+  }
   useEffect(() => {
     void load()
   }, [])
@@ -80,8 +89,8 @@ export default function ManageCourse() {
       setMsg("Course deleted successfully.")
       load()
     } catch (e: any) {
-      setDel(null)
       setErr(e.message)
+      throw e
     }
   }
   const cols: Column<Course>[] = [
@@ -179,6 +188,8 @@ export default function ManageCourse() {
           />
         </div>
         <DataTable
+          loading={loading}
+          error={loadError}
           columns={cols}
           rows={filtered}
           keyFn={(r) => r.code}

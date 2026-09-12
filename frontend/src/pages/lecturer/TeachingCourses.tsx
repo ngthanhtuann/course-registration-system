@@ -20,29 +20,58 @@ export default function ManageTeachingCourse({
   const [courses, setCourses] = useState<any[]>([])
   const [view, setView] = useState<any>(null)
   const [students, setStudents] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+  const [studentsLoading, setStudentsLoading] = useState(false)
+  const [studentsError, setStudentsError] = useState("")
   useEffect(() => {
+    let active = true
     api.lecturer
       .semesters()
       .then((s) => {
+        if (!active) return
         setSems(s)
         if (s[0]) setSemester(s[0].semester_id)
+        else setLoading(false)
       })
-      .catch(() => {})
+      .catch((e) => {
+        if (!active) return
+        setError(e.message || "Could not load semesters.")
+        setLoading(false)
+      })
+    return () => { active = false }
   }, [])
   useEffect(() => {
-    if (semester)
-      api.lecturer
-        .teachingCourses(semester)
-        .then(setCourses)
-        .catch(() => setCourses([]))
+    if (!semester) return
+    let active = true
+    setLoading(true)
+    setError("")
+    api.lecturer.teachingCourses(semester)
+      .then((data) => { if (active) setCourses(data) })
+      .catch((e) => {
+        if (active) setError(e.message || "Could not load teaching courses.")
+      })
+      .finally(() => { if (active) setLoading(false) })
+    return () => { active = false }
   }, [semester])
-  const open = async (c: any) => {
+  useEffect(() => {
+    if (!view || !semester) return
+    let active = true
+    setStudentsLoading(true)
+    setStudentsError("")
+    api.lecturer.students(view.course_code, semester)
+      .then((data) => { if (active) setStudents(data) })
+      .catch((e) => {
+        if (active) setStudentsError(e.message || "Could not load registered students.")
+      })
+      .finally(() => { if (active) setStudentsLoading(false) })
+    return () => { active = false }
+  }, [view, semester])
+  const open = (c: any) => {
     setView(c)
-    try {
-      setStudents(await api.lecturer.students(c.course_code, semester))
-    } catch {
-      setStudents([])
-    }
+    setStudents([])
+    setStudentsLoading(true)
+    setStudentsError("")
   }
   const cols: Column<any>[] = [
     {
@@ -81,13 +110,21 @@ export default function ManageTeachingCourse({
             label: s.semester_name,
           }))}
           value={semester}
-          onChange={(e) => setSemester(e.target.value)}
+          onChange={(e) => {
+            setSemester(e.target.value)
+            setCourses([])
+            setView(null)
+            setLoading(!!e.target.value)
+            setError("")
+          }}
         />
       </Card>
       <Card>
         <DataTable
           columns={cols}
           rows={courses}
+          loading={loading}
+          error={error}
           keyFn={(r) => r.assignment_id}
           emptyText="No teaching courses found."
         />
@@ -115,6 +152,8 @@ export default function ManageTeachingCourse({
             },
           ]}
           rows={students}
+          loading={studentsLoading}
+          error={studentsError}
           keyFn={(r) => r.registration_id}
           emptyText="No registered students."
         />

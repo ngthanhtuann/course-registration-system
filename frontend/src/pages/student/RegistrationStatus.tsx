@@ -17,29 +17,40 @@ export default function ViewRegistrationStatus({
   const [sems, setSems] = useState<any[]>([])
   const [semester, setSemester] = useState("")
   const [rows, setRows] = useState<any[]>([])
-  const [period, setPeriod] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
   useEffect(() => {
-    Promise.all([api.student.semesters(), api.student.periods()])
-      .then(([s, p]) => {
+    let active = true
+    api.student.semesters()
+      .then((s) => {
+        if (!active) return
         setSems(s)
         if (s[0]) setSemester(s[0].semester_id)
-        if (p[0]) setPeriod(p[0])
+        else setLoading(false)
       })
-      .catch(() => {})
+      .catch((e) => {
+        if (!active) return
+        setError(e.message || "Could not load semesters.")
+        setLoading(false)
+      })
+    return () => { active = false }
   }, [])
   useEffect(() => {
-    if (semester) {
-      api.student
-        .registrations(semester)
-        .then(setRows)
-        .catch(() => setRows([]))
-      api.student
-        .periods()
-        .then((p) =>
-          setPeriod(p.find((x) => x.semester_id === semester) || null),
-        )
-    }
+    if (!semester) return
+    let active = true
+    setLoading(true)
+    setError("")
+    api.student.registrations(semester)
+      .then((data) => { if (active) setRows(data) })
+      .catch((e) => {
+        if (active) setError(e.message || "Could not load registrations.")
+      })
+      .finally(() => { if (active) setLoading(false) })
+    return () => { active = false }
   }, [semester])
+  const periods = Array.from(new Map(
+    rows.filter((r) => r.period_id).map((r) => [r.period_id, r]),
+  ).values())
   const cols: Column<any>[] = [
     {
       key: "course_code",
@@ -48,6 +59,11 @@ export default function ViewRegistrationStatus({
     },
     { key: "course_name", header: "Course Name" },
     { key: "credit", header: "Credits" },
+    {
+      key: "period_name",
+      header: "Registration Period",
+      render: (r) => r.period_name || r.period_id || "—",
+    },
     {
       key: "status",
       header: "Registration Status",
@@ -68,35 +84,45 @@ export default function ViewRegistrationStatus({
             label: s.semester_name,
           }))}
           value={semester}
-          onChange={(e) => setSemester(e.target.value)}
+          onChange={(e) => {
+            setSemester(e.target.value)
+            setRows([])
+            setLoading(!!e.target.value)
+            setError("")
+          }}
           placeholder="Select semester"
         />
       </Card>
-      {period && (
-        <Card className="p-4 mb-4">
+      {!loading && !error && periods.map((period) => (
+        <Card key={period.period_id} className="p-4 mb-4">
           <div className="flex justify-between">
             <div>
-              <p className="font-semibold">Registration Period</p>
+              <p className="font-semibold">{period.period_name || "Registration Period"}</p>
               <p className="text-xs text-slate-500">
-                {period.start_date} → {period.end_date}
+                {period.registration_start_date} → {period.registration_end_date}
+              </p>
+              <p className="text-xs text-slate-500">
+                Drop Period: {period.drop_start_date} → {period.drop_end_date}
               </p>
             </div>
             <Badge
               label={
-                period.current_status === "open"
+                period.current_registration_status === "open"
                   ? "Open"
-                  : period.current_status === "upcoming"
+                  : period.current_registration_status === "upcoming"
                     ? "Scheduled"
                     : "Closed"
               }
             />
           </div>
         </Card>
-      )}
+      ))}
       <Card>
         <DataTable
           columns={cols}
           rows={rows}
+          loading={loading}
+          error={error}
           keyFn={(r) => r.registration_id}
           emptyText="No registrations found for this semester."
         />
