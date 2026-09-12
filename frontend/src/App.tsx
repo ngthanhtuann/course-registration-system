@@ -149,6 +149,8 @@ export default function App() {
   }, [])
 
   const handleLogout = () => {
+    // Send the current token before clearing local auth, even if the network fails.
+    void api.logout().catch(() => {})
     clearAuth()
     setUser(null)
   }

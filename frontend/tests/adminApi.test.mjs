@@ -22,6 +22,25 @@ const compiled = ts.transpileModule(source, {
 const { api, saveAuth, clearAuth } = await import(`data:text/javascript;base64,${Buffer.from(compiled).toString("base64")}`)
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status })
 
+test("logout sends the old token before local auth is cleared", async (t) => {
+  let sent
+  t.mock.method(globalThis, "fetch", async (url, options) => {
+    sent = { url, method: options.method, token: options.headers.get("Authorization") }
+    return json({ message: "Logged out" })
+  })
+  const pending = api.logout()
+  clearAuth()
+  await pending
+  assert.deepEqual(sent, { url: "/api/logout", method: "POST", token: "Bearer test-session" })
+})
+
+test("student demand details forward the selected major", async (t) => {
+  let requested
+  t.mock.method(globalThis, "fetch", async (url) => { requested = url; return json([]) })
+  await api.admin.demandStudents("X", "P1", "A B")
+  assert.equal(requested, "/api/admin/registration-demand/X/students?period_id=P1&major_code=A%20B")
+})
+
 beforeEach(() => {
   storage.clear()
   clearAdminCache()

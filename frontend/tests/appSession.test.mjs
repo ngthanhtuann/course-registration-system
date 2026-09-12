@@ -54,6 +54,22 @@ const cached = (role = "admin") => ({
 })
 const base = (role = "admin") => ({ user_id: "example", username: "example",
   fullname: "Fresh name", email: "example@test.invalid", role, active_status: true })
+
+test("logout clears the session even when the backend request fails", async () => {
+  let sentToken
+  fixture.api.logout = async () => {
+    sentToken = fixture.token
+    throw new Error("Network unavailable")
+  }
+  const tree = App()
+  const routes = tree.props.children[0].props.children
+  const adminRoute = routes.find((route) => route.props.path === "/admin/*")
+  adminRoute.props.element.props.onLogout()
+  await flush()
+  assert.equal(sentToken, "session")
+  assert.equal(fixture.token, null)
+  assert.equal(fixture.state, null)
+})
 beforeEach(() => {
   fixture.token = "session"
   fixture.stored = cached()

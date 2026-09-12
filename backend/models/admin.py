@@ -907,6 +907,7 @@ class Administrator(User):
                 count(distinct r.registration_id)
                 filter (
                     where r.registration_status = 'registered'
+                      and (%s is null or s.major_code = %s)
                 ) as registered_students
             from curriculum cu
             join courses c
@@ -914,11 +915,12 @@ class Administrator(User):
             left join registrations r
                 on r.course_code = c.course_code
                and r.period_id = %s
+            left join students s on s.student_id = r.student_id
             where (%s is null or cu.major_code = %s)
             group by c.course_code, c.course_name
             order by c.course_code
         """,
-                (period_id, major_code, major_code),
+                (major_code, major_code, period_id, major_code, major_code),
             )
             return demand
         finally:
@@ -927,6 +929,7 @@ class Administrator(User):
     def demand_students(self, course_code, query):
         """Get students registered for a course in a period."""
         period_id = query.get("period_id")
+        major_code = query.get("major_code")
         if not period_id:
             return ({"error": "period_id is required"}, 400)
         db = get_db()
@@ -946,9 +949,10 @@ class Administrator(User):
             where r.period_id = %s
               and r.course_code = %s
               and r.registration_status = 'registered'
+              and (%s is null or s.major_code = %s)
             order by s.student_id
         """,
-                (period_id, course_code),
+                (period_id, course_code, major_code, major_code),
             )
             return students
         finally:

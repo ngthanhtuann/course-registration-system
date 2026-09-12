@@ -1,10 +1,31 @@
 """Authorization utilities for the Flask API."""
 
 from functools import wraps
+from threading import Lock
+from time import time
 import jwt
 from flask import jsonify, request
 from config import JWT_ALGORITHM, JWT_SECRET
 from database import get_db
+
+# Single-process demo only. Production multi-instance needs a shared Redis/DB denylist.
+revoked_tokens = {}
+_revoked_lock = Lock()
+
+
+def revoke_current_token(payload):
+    token = request.headers.get("Authorization", "").split(" ", 1)[1]
+    with _revoked_lock:
+        revoked_tokens[token] = payload.get("exp")
+
+
+def is_token_revoked(token):
+    with _revoked_lock:
+        now = time()
+        for saved_token, expires in list(revoked_tokens.items()):
+            if expires is not None and expires <= now:
+                del revoked_tokens[saved_token]
+        return token in revoked_tokens
 
 
 def get_current_user():
@@ -12,9 +33,12 @@ def get_current_user():
     header = request.headers.get("Authorization", "")
     if not header.startswith("Bearer "):
         return None
+    token = header.split(" ", 1)[1]
+    if is_token_revoked(token):
+        return None
     try:
         payload = jwt.decode(
-            header.split(" ", 1)[1], JWT_SECRET, algorithms=[JWT_ALGORITHM]
+            token, JWT_SECRET, algorithms=[JWT_ALGORITHM]
         )
         return payload
     except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):

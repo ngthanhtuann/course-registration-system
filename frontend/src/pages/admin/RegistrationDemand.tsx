@@ -40,7 +40,7 @@ export default function ManageRegistrationDemand() {
   const view = async (code: string) => {
     try {
       setCourse(code)
-      setStudents(await api.admin.demandStudents(code, period))
+      setStudents(await api.admin.demandStudents(code, period, major))
     } catch (e: any) {
       setErr(e.message)
     }

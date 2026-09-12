@@ -94,8 +94,6 @@ Course Registration System/
 │   ├── tsconfig.json
 │   ├── vite.config.ts
 │   └── index.html
-├── tests/
-│   └── unit/
 ├── docs/
 ├── .gitignore
 └── README.md
@@ -327,12 +325,24 @@ If both frontend and backend are running in separate Terminals, stop each one se
 
 ## 13. Run unit tests
 
-Activate the Python virtual environment and run from the project root:
+Activate the Python virtual environment. From the project root, enter `backend`
+so Python can import `models`, `database`, and `routes`, then run discovery:
 
 ```bash
-python -m unittest discover -s tests/unit -v
+cd backend
+python -m unittest discover -s tests -p "test_*.py" -v
+cd ..
 ```
 
+Tests are in `backend/tests`. Set `JWT_SECRET` as described above before running.
+For tests only, you can instead generate a temporary secret in PowerShell before
+running discovery (no `.env` edit needed):
+
+```powershell
+$env:JWT_SECRET = python -c "import secrets; print(secrets.token_urlsafe(48))"
+```
+
+These tests use mocks and do not require changes to the database.
 Current unit tests cover examples of:
 
 - User authentication validation
@@ -379,7 +389,7 @@ npm run build
 ### Database and tests
 
 - `database/schema.sql` - creates the PostgreSQL schema and database rules.
-- `tests/unit/` - basic unit tests.
+- `backend/tests/` - backend unit tests.
 - `docs/` - project requirements, design and report documents.
 
 ## 15. Shared Neon database
