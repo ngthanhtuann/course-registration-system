@@ -237,9 +237,11 @@ export const api = {
         }`,
       ),
 
-    demandStudents: (courseCode: string, periodId: string) =>
+    demandStudents: (courseCode: string, periodId: string, majorCode = "") =>
       request<any[]>(
-        `/api/admin/registration-demand/${encodeURIComponent(courseCode)}/students?period_id=${encodeURIComponent(periodId)}`,
+        `/api/admin/registration-demand/${encodeURIComponent(courseCode)}/students?period_id=${encodeURIComponent(periodId)}${
+          majorCode ? `&major_code=${encodeURIComponent(majorCode)}` : ""
+        }`,
       ),
 
     assignments: (semesterId = "") =>

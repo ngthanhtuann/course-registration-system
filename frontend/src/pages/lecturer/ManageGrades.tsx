@@ -23,48 +23,87 @@ export default function ManageStudentGrades({
   const [rows, setRows] = useState<any[]>([])
   const [msg, setMsg] = useState("")
   const [err, setErr] = useState("")
+  const [saving, setSaving] = useState(false)
   useEffect(() => {
+    let active = true
     api.lecturer
       .semesters()
       .then((s) => {
+        if (!active) return
         setSems(s)
         if (s[0]) setSemester(s[0].semester_id)
       })
-      .catch((e) => setErr(e.message))
+      .catch((e) => {
+        if (active) setErr(e.message)
+      })
+    return () => {
+      active = false
+    }
   }, [])
   useEffect(() => {
+    setCourses([])
+    setCourse("")
+    setRows([])
     if (!semester) return
+    let active = true
     api.lecturer
       .teachingCourses(semester)
       .then((c) => {
+        if (!active) return
         setCourses(c)
         setCourse(c[0]?.course_code || "")
       })
-      .catch((e) => setErr(e.message))
+      .catch((e) => {
+        if (active) setErr(e.message)
+      })
+    return () => {
+      active = false
+    }
   }, [semester])
   useEffect(() => {
-    if (semester && course)
-      api.lecturer
-        .students(course, semester)
-        .then(setRows)
-        .catch((e) => setErr(e.message))
+    setRows([])
+    setMsg("")
+    setErr("")
+    if (!semester || !course) return
+    let active = true
+    api.lecturer
+      .students(course, semester)
+      .then((students) => {
+        if (active) setRows(students)
+      })
+      .catch((e) => {
+        if (active) setErr(e.message)
+      })
+    return () => {
+      // Ignore old results when the selected course changes.
+      active = false
+    }
   }, [semester, course])
   const save = async (r: any) => {
-    const value = Number(r._grade)
+    if (saving) return
+    setMsg("")
+    setErr("")
+    const input = String(r._grade ?? "").trim()
+    if (input === "") {
+      setErr("Please enter a grade before saving.")
+      return
+    }
+    const value = Number(input)
     if (!Number.isFinite(value) || value < 0 || value > 10) {
       setErr("Grade must be between 0 and 10.")
       return
     }
+    setSaving(true)
     try {
-      await api.lecturer.updateGrade(r.registration_id, value)
+      const result = await api.lecturer.updateGrade(r.registration_id, value)
       setMsg("Grade saved successfully.")
       setRows((prev) =>
         prev.map((x) =>
           x.registration_id === r.registration_id
             ? {
                 ...x,
-                grade: value,
-                result_status: value >= 5 ? "passed" : "not passed",
+                grade: result.grade,
+                result_status: result.result_status,
                 _grade: "",
               }
             : x,
@@ -72,6 +111,8 @@ export default function ManageStudentGrades({
       )
     } catch (e: any) {
       setErr(e.message)
+    } finally {
+      setSaving(false)
     }
   }
   const cols: Column<any>[] = [
@@ -96,6 +137,7 @@ export default function ManageStudentGrades({
           max="10"
           step="0.1"
           value={r._grade ?? ""}
+          disabled={saving}
           onChange={(e) =>
             setRows((prev) =>
               prev.map((x) =>
@@ -112,7 +154,11 @@ export default function ManageStudentGrades({
       key: "action",
       header: "Action",
       render: (r) => (
-        <Button size="sm" onClick={() => save(r)}>
+        <Button
+          size="sm"
+          onClick={() => save(r)}
+          disabled={saving || String(r._grade ?? "").trim() === ""}
+        >
           Save
         </Button>
       ),
@@ -143,7 +189,13 @@ export default function ManageStudentGrades({
               label: s.semester_name,
             }))}
             value={semester}
-            onChange={(e) => setSemester(e.target.value)}
+            disabled={saving}
+            onChange={(e) => {
+              setSemester(e.target.value)
+              setCourses([])
+              setCourse("")
+              setRows([])
+            }}
           />
           <Select
             label="Course"
@@ -152,7 +204,11 @@ export default function ManageStudentGrades({
               label: `${c.course_code} — ${c.course_name}`,
             }))}
             value={course}
-            onChange={(e) => setCourse(e.target.value)}
+            disabled={saving}
+            onChange={(e) => {
+              setCourse(e.target.value)
+              setRows([])
+            }}
             placeholder="Select course"
           />
         </div>

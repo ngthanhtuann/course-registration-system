@@ -1,11 +1,30 @@
 """Functions for the Student role."""
 
+import psycopg2
+
 from database import get_db
+from uuid import uuid4
 from .user import User
 from .course import Course
 from .major import Major
 from .registration import Registration
-from .registration_period import RegistrationPeriod
+
+
+def _required_text(value, field_name):
+    """Return a trimmed non-empty string or raise ValueError."""
+    if not isinstance(value, str):
+        raise ValueError(f"{field_name} must be a string")
+    value = value.strip()
+    if not value:
+        raise ValueError(f"{field_name} is required")
+    return value
+
+
+def _optional_text(value, field_name):
+    """Validate an optional string."""
+    if value is None:
+        return None
+    return _required_text(value, field_name)
 
 
 class Student(User):
@@ -83,6 +102,13 @@ class Student(User):
         period_id = query.get("period_id")
         db = get_db()
         try:
+            if period_id is not None:
+                period = db.fetch_one(
+                    "select period_id from registration_periods where period_id=%s",
+                    (period_id,),
+                )
+                if not period:
+                    return ({"error": "registration period not found"}, 404)
             student_record = db.fetch_one(
                 "select student_id from students where user_id=%s",
                 (student["user_id"],),
@@ -133,91 +159,154 @@ class Student(User):
             db.close()
 
     def registerCourse(self, data):
-        """Check registration conditions and register the student for a course."""
-        # 1. Get the selected course and registration period.
+        """Validate and register a course with fewer database round-trips."""
         student = self.identity
         data = data or {}
-        course_code = data.get("course_code")
-        period_id = data.get("period_id")
-        if not course_code or not period_id:
-            return ({"error": "course_code and period_id are required"}, 400)
+
+        try:
+            course_code = _required_text(data.get("course_code"), "course_code")
+            period_id = _required_text(data.get("period_id"), "period_id")
+            registration_id = _optional_text(
+                data.get("registration_id"),
+                "registration_id",
+            )
+        except ValueError as exc:
+            return ({"error": str(exc)}, 400)
+
+        if registration_id is None:
+            registration_id = uuid4().hex[:20]
+        else:
+            registration_id = registration_id[:20]
+
         db = get_db()
         try:
-            # 2. Lock the course row before checking available seats.
-            course = db.fetch_one(
-                "select * from courses where course_code=%s for update", (course_code,)
+            context = db.fetch_one(
+                """
+                select
+                    c.course_id,
+                    c.course_code,
+                    c.max_capacity,
+                    c.prerequisite_course_code,
+                    rp.period_id,
+                    rp.semester_id,
+                    s.student_id,
+                    s.major_code,
+                    case
+                        when rp.period_id is null then false
+                        else current_date between rp.start_date and rp.end_date
+                    end as period_open,
+                    exists (
+                        select 1
+                        from curriculum cu
+                        where cu.major_code = s.major_code
+                          and cu.course_code = c.course_code
+                    ) as eligible,
+                    exists (
+                        select 1
+                        from registrations r
+                        where r.student_id = s.student_id
+                          and r.course_id = c.course_id
+                          and r.semester_id = rp.semester_id
+                          and r.status = 'REGISTERED'
+                    ) as duplicate_registration,
+                    exists (
+                        select 1
+                        from registrations r
+                        where r.student_id = s.student_id
+                          and r.course_id = c.course_id
+                          and r.result_status = 'passed'
+                    ) as already_passed,
+                    case
+                        when c.prerequisite_course_code is null then true
+                        else exists (
+                            select 1
+                            from registrations pr
+                            where pr.student_id = s.student_id
+                              and pr.course_code = c.prerequisite_course_code
+                              and pr.result_status = 'passed'
+                        )
+                    end as prerequisite_satisfied,
+                    coalesce((
+                        select count(*)
+                        from registrations cr
+                        where cr.course_id = c.course_id
+                          and cr.semester_id = rp.semester_id
+                          and cr.status = 'REGISTERED'
+                    ), 0) as registered_count
+                from (select 1) seed
+                left join courses c
+                    on c.course_code = %s
+                left join registration_periods rp
+                    on rp.period_id = %s
+                left join students s
+                    on s.user_id = %s
+                """,
+                (course_code, period_id, student["user_id"]),
             )
-            if not course:
-                db.conn.rollback()
+
+            if not context.get("course_id"):
                 return ({"error": "course not found"}, 404)
-            # 3. Check that registration is open.
-            period = db.fetch_one(
-                """select * from registration_periods
-            where period_id=%s and current_date between start_date and end_date for update""",
-                (period_id,),
-            )
-            if not period:
-                db.conn.rollback()
-                return ({"error": "registration period is not open"}, 400)
-            student_record = db.fetch_one(
-                "select student_id, major_code from students where user_id=%s",
-                (student["user_id"],),
-            )
-            if not student_record:
-                db.conn.rollback()
+            if not context.get("period_id"):
+                return ({"error": "registration period not found"}, 404)
+            if not context.get("student_id"):
                 return ({"error": "student profile not found"}, 404)
-            # 4. Check that the course belongs to the student curriculum.
-            self.studentID = student_record["student_id"]
-            self.major = Major(student_record["major_code"])
-            eligible = self.major.includesCourse(db, course_code)
-            if not eligible:
-                db.conn.rollback()
-                return (
-                    {"error": "course does not belong to student's curriculum"},
-                    400,
-                )
-            # 5. Check duplicate registration and completed courses.
-            duplicate = db.fetch_one(
-                """select 1 from registrations
-            where student_id=%s and course_code=%s and semester_id=(select semester_id from registration_periods where period_id=%s) and registration_status='registered'""",
-                (student_record["student_id"], course_code, period_id),
-            )
-            if duplicate:
-                db.conn.rollback()
+            if not context.get("period_open"):
+                return ({"error": "registration period is not open"}, 400)
+            if not context.get("eligible"):
+                return ({"error": "course does not belong to student's curriculum"}, 400)
+            if context.get("duplicate_registration"):
                 return ({"error": "student is already registered for this course"}, 409)
-            passed = db.fetch_one(
-                """select 1 from registrations
-            where student_id=%s and course_code=%s and result_status='passed'""",
-                (student_record["student_id"], course_code),
-            )
-            if passed:
-                db.conn.rollback()
+            if context.get("already_passed"):
                 return ({"error": "student has already completed this course"}, 400)
-            # 6. Check prerequisite and course capacity.
-            course_object = Course.from_row(course)
-            if not course_object.checkPrerequisite(db, self.studentID):
-                db.conn.rollback()
+            if not context.get("prerequisite_satisfied"):
                 return ({"error": "prerequisite is not satisfied"}, 400)
-            if not course_object.checkCapacity(db, period_id):
-                db.conn.rollback()
+            if int(context.get("registered_count") or 0) >= int(context["max_capacity"]):
                 return ({"error": "course capacity has been reached"}, 409)
-            # 7. Save the registration.
-            registration = Registration(
-                self.studentID, course_code, period_id, data.get("registration_id")
+
+            saved = db.fetch_one(
+                """
+                insert into registrations
+                    (registration_id, student_id, course_id, semester_id,
+                     status, period_id, course_code)
+                values
+                    (%s, %s, %s, %s,
+                     'REGISTERED'::registration_status_type, %s, %s)
+                on conflict (student_id, semester_id, course_id)
+                do update set
+                    status = 'REGISTERED'::registration_status_type,
+                    period_id = excluded.period_id,
+                    grade = null,
+                    result_status = null
+                returning registration_id
+                """,
+                (
+                    registration_id,
+                    context["student_id"],
+                    context["course_id"],
+                    context["semester_id"],
+                    period_id,
+                    course_code,
+                ),
             )
-            registration_id = registration.saveRegistration(db)
+
             db.conn.commit()
             return (
                 {
                     "message": "course registered successfully",
-                    "registration_id": registration_id,
+                    "registration_id": saved["registration_id"],
                 },
                 201,
             )
-        except Exception as exc:
-            # Undo database changes if registration fails.
+
+        except (psycopg2.IntegrityError, psycopg2.errors.RaiseException):
             db.conn.rollback()
-            return ({"error": "registration failed: duplicate registration or invalid data"}, 409)
+            return (
+                {"error": "registration conflicts with existing data or course capacity"},
+                409,
+            )
+        except Exception:
+            db.conn.rollback()
+            raise
         finally:
             db.close()
 
@@ -234,9 +323,13 @@ class Student(User):
                    (c.max_capacity - (select count(*) from registrations rr where rr.course_code=r.course_code and rr.semester_id=r.semester_id and rr.registration_status='registered')) as available_seats,
                    rp.start_date as registration_start_date,
                    rp.end_date as registration_end_date,
+                   rp.drop_start_date, rp.drop_end_date,
                    case when current_date < rp.start_date then 'upcoming'
                         when current_date <= rp.end_date then 'open'
-                        else 'closed' end as current_registration_status
+                        else 'closed' end as current_registration_status,
+                   case when current_date < rp.drop_start_date then 'upcoming'
+                        when current_date <= rp.drop_end_date then 'open'
+                        else 'closed' end as current_drop_status
             from registrations r
             join students s on s.student_id=r.student_id
             join courses c on c.course_code=r.course_code
@@ -250,7 +343,7 @@ class Student(User):
             db.close()
 
     def dropCourse(self, registration_id):
-        """Drop a course while the registration period is open."""
+        """Drop a course while the drop period is open."""
         student = self.identity
         db = get_db()
         try:
@@ -263,7 +356,7 @@ class Student(User):
             row = db.fetch_one(
                 """
             select r.registration_id, r.registration_status, s.student_id, r.course_code, r.period_id,
-                   rp.drop_start_date as start_date, rp.drop_end_date as end_date
+                   current_date between rp.drop_start_date and rp.drop_end_date as can_drop
             from registrations r
             join students s on s.student_id=r.student_id
             join registration_periods rp on rp.period_id=r.period_id
@@ -275,9 +368,7 @@ class Student(User):
                 return ({"error": "registration not found"}, 404)
             if row["registration_status"] != "registered":
                 return ({"error": "course is not currently registered"}, 400)
-            period = RegistrationPeriod("", row["start_date"], row["end_date"])
-            period_status = period.updateRegistrationStatus()
-            if period_status != "open":
+            if not row["can_drop"]:
                 return ({"error": "drop period is not open"}, 400)
             registration = Registration(
                 row["student_id"], row["course_code"], row["period_id"], registration_id

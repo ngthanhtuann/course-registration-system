@@ -150,8 +150,10 @@ export default function ManageUser() {
       setUsers(u)
       setMajors(m)
       setCourses(c)
+      return u
     } catch (e: any) {
       setErr(e.message)
+      return []
     }
   }
   useEffect(() => {
@@ -263,8 +265,8 @@ export default function ManageUser() {
       await api.admin.addQualification(selected.lecturerId, qualCourse)
       setQualCourse("")
       setMsg("Teaching qualification added.")
-      await load()
-      const fresh = (await api.admin.users())
+      const freshUsers = await load()
+      const fresh = freshUsers
         .map(normalized)
         .find((u: any) => u.id === selected.id)
       if (fresh) {
@@ -280,8 +282,8 @@ export default function ManageUser() {
     try {
       await api.admin.removeQualification(selected.lecturerId, code)
       setMsg("Teaching qualification removed.")
-      await load()
-      const fresh = (await api.admin.users())
+      const freshUsers = await load()
+      const fresh = freshUsers
         .map(normalized)
         .find((u: any) => u.id === selected.id)
       if (fresh) setSelected(fresh)

@@ -57,7 +57,7 @@ export default function DropCourse({ user: _user }: { user: Student }) {
           size="sm"
           variant="danger"
           onClick={() => setConfirm(r)}
-          disabled={r.current_registration_status !== "open"}
+          disabled={r.current_drop_status !== "open"}
         >
           Drop
         </Button>
@@ -68,7 +68,7 @@ export default function DropCourse({ user: _user }: { user: Student }) {
     <div>
       <SectionHeader
         title="Drop Course"
-        subtitle="Drop courses currently registered in an open registration period"
+        subtitle="Drop registered courses during their allowed drop period"
       />
       {msg && (
         <div className="mb-3">

@@ -2,7 +2,6 @@
 
 from database import get_db
 from .user import User
-from math import isfinite
 from .grade import GradeRecord
 
 
@@ -111,14 +110,18 @@ class Lecturer(User):
         lecturer = self.identity
         data = data or {}
         grade = data.get("grade")
+
         if grade is None:
             return ({"error": "grade is required"}, 400)
+
         try:
-            grade = float(grade)
-        except (TypeError, ValueError):
-            return ({"error": "grade must be a number"}, 400)
-        if not isfinite(grade) or grade < 0 or grade > 10:
-            return ({"error": "grade must be between 0 and 10"}, 400)
+            grade_record = GradeRecord(grade)
+            result_status = grade_record.calculateResultStatus()
+        except ValueError as exc:
+            return ({"error": str(exc)}, 400)
+
+        normalized_grade = grade_record.grade
+
         db = get_db()
         try:
             db.fetch_one(
@@ -154,15 +157,16 @@ class Lecturer(User):
             for period in periods:
                 if not period["ended"]:
                     return ({"error": "registration period has not ended"}, 400)
-            grade_record = GradeRecord(grade)
-            result_status = grade_record.calculateResultStatus()
+
             db.execute_query(
                 "update registrations set grade=%s, result_status=%s where registration_id=%s",
-                (grade, result_status, registration_id),
+                (normalized_grade, result_status, registration_id),
             )
             return {
                 "message": "grade saved successfully",
+                "grade": float(normalized_grade),
                 "result_status": result_status,
             }
         finally:
             db.close()
+

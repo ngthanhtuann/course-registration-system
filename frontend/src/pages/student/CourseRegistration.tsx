@@ -15,32 +15,42 @@ interface Props {
   user: Student
 }
 export default function CourseRegistration({ user }: Props) {
-  const [, setPeriods] = useState<any[]>([])
   const [period, setPeriod] = useState<any>(null)
   const [rows, setRows] = useState<any[]>([])
   const [confirm, setConfirm] = useState<any>(null)
   const [msg, setMsg] = useState("")
   const [err, setErr] = useState("")
-  const load = async () => {
-    try {
-      const p = await api.student.periods()
-      setPeriods(p)
-      const open = p.find((x) => x.current_status === "open")
-      setPeriod(open || p[0] || null)
-      if (open) setRows(await api.student.courses(open.period_id))
-    } catch (e: any) {
-      setErr(e.message)
-    }
-  }
   useEffect(() => {
-    load()
+    let active = true
+    api.student
+      .periods()
+      .then((periods) => {
+        if (!active) return
+        const open = periods.find((p) => p.current_status === "open")
+        setPeriod(open || periods[0] || null)
+      })
+      .catch((e) => {
+        if (active) setErr(e.message)
+      })
+    return () => {
+      active = false
+    }
   }, [])
   useEffect(() => {
-    if (period)
-      api.student
-        .courses(period.period_id)
-        .then(setRows)
-        .catch((e) => setErr(e.message))
+    setRows([])
+    if (!period) return
+    let active = true
+    api.student
+      .courses(period.period_id)
+      .then((courses) => {
+        if (active) setRows(courses)
+      })
+      .catch((e) => {
+        if (active) setErr(e.message)
+      })
+    return () => {
+      active = false
+    }
   }, [period])
   const register = async () => {
     if (!confirm || !period) return

@@ -64,12 +64,9 @@ export default function App() {
         return
       }
       try {
-        const base = await api.me()
-        let full: any = base
-        if (base.role === "student") full = await api.student.profile()
-        if (base.role === "lecturer") full = await api.lecturer.profile()
+        const full = await api.me()
         const normalized =
-          base.role === "student"
+          full.role === "student"
             ? {
                 id: full.user_id,
                 username: full.username,
@@ -80,7 +77,7 @@ export default function App() {
                 studentId: full.student_id,
                 major: full.major_code,
               }
-            : base.role === "lecturer"
+            : full.role === "lecturer"
               ? {
                   id: full.user_id,
                   username: full.username,

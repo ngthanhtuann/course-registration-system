@@ -40,41 +40,31 @@ export default function Login({ onLogin }: LoginProps) {
       saveAuth(result.token, result.user)
 
       const base = result.user
-      let full: any = base
 
-      // Get full Student profile
-      if (base.role === "student") {
-        full = await api.student.profile()
-      }
-
-      // Get full Lecturer profile
-      if (base.role === "lecturer") {
-        full = await api.lecturer.profile()
-      }
-
-      // Build frontend user object
+      // The login response already contains the role-specific profile fields,
+      // so no extra /student/profile or /lecturer/profile request is needed.
       const user: any =
         base.role === "student"
           ? {
-              id: full.user_id,
-              username: full.username,
-              fullName: full.fullname,
-              email: full.email,
+              id: base.user_id,
+              username: base.username,
+              fullName: base.fullname,
+              email: base.email,
               role: "student",
               status: "Active",
-              studentId: full.student_id,
-              major: full.major_code,
+              studentId: base.student_id,
+              major: base.major_code,
             }
           : base.role === "lecturer"
             ? {
-                id: full.user_id,
-                username: full.username,
-                fullName: full.fullname,
-                email: full.email,
+                id: base.user_id,
+                username: base.username,
+                fullName: base.fullname,
+                email: base.email,
                 role: "lecturer",
                 status: "Active",
-                lecturerId: full.lecturer_id,
-                qualifications: full.qualifications || [],
+                lecturerId: base.lecturer_id,
+                qualifications: base.qualifications || [],
               }
             : {
                 id: base.user_id,

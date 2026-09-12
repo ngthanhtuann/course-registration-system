@@ -94,8 +94,6 @@ Course Registration System/
 │   ├── tsconfig.json
 │   ├── vite.config.ts
 │   └── index.html
-├── tests/
-│   └── unit/
 ├── docs/
 ├── .gitignore
 └── README.md
@@ -325,20 +323,15 @@ Ctrl + C
 
 If both frontend and backend are running in separate Terminals, stop each one separately.
 
-## 13. Run unit tests
+## 13. Check the code
 
-Activate the Python virtual environment and run from the project root:
+This checkout does not include a `tests/unit` folder. The checks below do not create output files, but they do not replace full functional tests.
+
+Activate the Python virtual environment and check backend syntax from the project root:
 
 ```bash
-python -m unittest discover -s tests/unit -v
+python -B -c "import ast; from pathlib import Path; [ast.parse(p.read_text()) for p in Path('backend').rglob('*.py')]; print('Python syntax OK')"
 ```
-
-Current unit tests cover examples of:
-
-- User authentication validation
-- Course value validation
-- Database connection behavior
-- Grade/result calculation
 
 Frontend TypeScript can be checked with:
 
@@ -347,7 +340,7 @@ cd frontend
 npm run typecheck
 ```
 
-A production frontend build can be checked with:
+A production frontend build can be checked with the following command. It creates files in `frontend/dist`, so skip it when no new files are allowed.
 
 ```bash
 npm run build
@@ -359,7 +352,7 @@ npm run build
 
 - `backend/main.py` - starts Flask, registers the API route groups and provides health endpoints.
 - `backend/config.py` - reads JWT settings from `.env`.
-- `backend/database.py` - opens PostgreSQL connections and provides query helper methods.
+- `backend/database.py` - reuses PostgreSQL connections through a small connection pool and provides query helper methods. A pool keeps a connection ready for later requests, avoiding repeated connection setup.
 - `backend/setup_database.py` - initializes a new database using `database/schema.sql`.
 - `backend/create_admin.py` - creates the first Administrator account.
 - `backend/models/` - contains the object-oriented system logic.
@@ -376,10 +369,9 @@ npm run build
 - `frontend/src/styles.css` - global styles and Tailwind setup.
 - `frontend/vite.config.ts` - Vite configuration and local API proxy.
 
-### Database and tests
+### Database and documentation
 
 - `database/schema.sql` - creates the PostgreSQL schema and database rules.
-- `tests/unit/` - basic unit tests.
 - `docs/` - project requirements, design and report documents.
 
 ## 15. Shared Neon database

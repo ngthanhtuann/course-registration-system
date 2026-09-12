@@ -1,25 +1,39 @@
 """Grade model."""
 
-from math import isfinite
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 
 
 class GradeRecord:
-    """Store a grade and its result status."""
+    """Store a normalized grade and its result status."""
 
     def __init__(self, grade=None, resultStatus=None):
         """Create a GradeRecord object."""
-        self.grade = grade
+        self.grade = self.normalizeGrade(grade)
         self.resultStatus = resultStatus
 
+    @staticmethod
+    def normalizeGrade(grade):
+        """Validate a grade and round it to two decimal places."""
+        if grade is None:
+            return None
+
+        try:
+            value = Decimal(str(grade))
+        except (InvalidOperation, TypeError, ValueError):
+            raise ValueError("grade must be a number")
+
+        if not value.is_finite() or value < Decimal("0") or value > Decimal("10"):
+            raise ValueError("grade must be between 0 and 10")
+
+        return value.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
     def calculateResultStatus(self):
-        """Check the grade and return passed or failed."""
+        """Return passed or not passed from the normalized grade."""
         if self.grade is None:
             self.resultStatus = None
+        elif self.grade >= Decimal("5.00"):
+            self.resultStatus = "passed"
         else:
-            if not isfinite(self.grade) or not 0 <= self.grade <= 10:
-                raise ValueError("grade must be between 0 and 10")
-            if self.grade >= 5:
-                self.resultStatus = "passed"
-            else:
-                self.resultStatus = "not passed"
+            self.resultStatus = "not passed"
+
         return self.resultStatus

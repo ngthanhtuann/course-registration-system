@@ -2,6 +2,27 @@
 
 from database import get_db
 from utils.password import hash_password, check_password, make_token
+import re
+
+_EMAIL_PATTERN = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
+
+
+def _required_text(value, field_name):
+    """Return a trimmed non-empty string or raise ValueError."""
+    if not isinstance(value, str):
+        raise ValueError(f"{field_name} must be a string")
+    value = value.strip()
+    if not value:
+        raise ValueError(f"{field_name} is required")
+    return value
+
+
+def _valid_email(value):
+    """Validate and normalize an email address."""
+    email = _required_text(value, "Email")
+    if not _EMAIL_PATTERN.fullmatch(email):
+        raise ValueError("Invalid email address")
+    return email
 
 
 class User:
@@ -55,53 +76,77 @@ class User:
         )
 
     def _loadLoginUser(self, db, username):
-        """Find a user account by username."""
-
+        """Find a user account and role-specific profile in one query."""
         return db.fetch_one(
             """
             select
-                user_id,
-                username,
-                password_hash,
-                password_hash as password,
-                full_name,
-                full_name as fullname,
-                email,
-                lower(role::text) as role,
-                active_status
-            from users
-            where username = %s
+                u.user_id,
+                u.username,
+                u.password_hash,
+                u.password_hash as password,
+                u.full_name,
+                u.full_name as fullname,
+                u.email,
+                lower(u.role::text) as role,
+                u.active_status,
+                s.student_id,
+                s.major_code,
+                l.lecturer_id,
+                coalesce(
+                    array_agg(distinct q.course_code)
+                    filter (where q.course_code is not null),
+                    '{}'
+                ) as qualifications
+            from users u
+            left join students s on s.user_id = u.user_id
+            left join lecturers l on l.user_id = u.user_id
+            left join lecturer_qualifications q on q.lecturer_id = l.lecturer_id
+            where u.username = %s
+            group by u.user_id, s.student_id, s.major_code, l.lecturer_id
             """,
             (username,),
         )
 
+    def _authUserPayload(self, user):
+        """Build the frontend user payload without another profile request."""
+        payload = {
+            "user_id": user["user_id"],
+            "username": user["username"],
+            "fullname": user["full_name"],
+            "email": user["email"],
+            "role": user["role"],
+        }
+
+        if user["role"] == "student":
+            payload["student_id"] = user.get("student_id")
+            payload["major_code"] = user.get("major_code")
+        elif user["role"] == "lecturer":
+            payload["lecturer_id"] = user.get("lecturer_id")
+            payload["qualifications"] = user.get("qualifications") or []
+
+        return payload
+
     def login(self, data):
         """Check username and password and return a login token."""
-
         data = data or {}
-
-        username = data.get("username", "").strip()
+        username = data.get("username", "")
         password = data.get("password", "")
 
+        if not isinstance(username, str) or not isinstance(password, str):
+            return ({"error": "username and password must be strings"}, 400)
+
+        username = username.strip()
         if not username or not password:
-            return (
-                {"error": "username and password are required"},
-                400,
-            )
+            return ({"error": "username and password are required"}, 400)
 
         db = get_db()
-
         try:
             user = self._loadLoginUser(db, username)
-
             valid_password = False
 
             if user:
                 try:
-                    valid_password = check_password(
-                        password,
-                        user["password_hash"],
-                    )
+                    valid_password = check_password(password, user["password_hash"])
                 except (ValueError, TypeError):
                     valid_password = False
 
@@ -110,32 +155,20 @@ class User:
                 or not user.get("active_status", True)
                 or not valid_password
             ):
-                return (
-                    {"error": "invalid username or password"},
-                    401,
-                )
+                return ({"error": "invalid username or password"}, 401)
 
             token = make_token(user)
-
             self._loadAccount(user)
 
             return {
                 "token": token,
-                "user": {
-                    "user_id": user["user_id"],
-                    "username": user["username"],
-                    "fullname": user["full_name"],
-                    "email": user["email"],
-                    "role": user["role"],
-                },
+                "user": self._authUserPayload(user),
             }
-
         finally:
             db.close()
 
     def viewAccountInfo(self):
-        """Get the current user account information."""
-
+        """Get account and role-specific profile information in one query."""
         user = self.identity
         db = get_db()
 
@@ -143,24 +176,36 @@ class User:
             result = db.fetch_one(
                 """
                 select
-                    user_id,
-                    username,
-                    full_name,
-                    full_name as fullname,
-                    email,
-                    lower(role::text) as role,
-                    active_status
-                from users
-                where user_id = %s
+                    u.user_id,
+                    u.username,
+                    u.full_name,
+                    u.full_name as fullname,
+                    u.email,
+                    lower(u.role::text) as role,
+                    u.active_status,
+                    s.student_id,
+                    s.major_code,
+                    l.lecturer_id,
+                    coalesce(
+                        array_agg(distinct q.course_code)
+                        filter (where q.course_code is not null),
+                        '{}'
+                    ) as qualifications
+                from users u
+                left join students s on s.user_id = u.user_id
+                left join lecturers l on l.user_id = u.user_id
+                left join lecturer_qualifications q on q.lecturer_id = l.lecturer_id
+                where u.user_id = %s
+                group by u.user_id, s.student_id, s.major_code, l.lecturer_id
                 """,
                 (user["user_id"],),
             )
 
-            if result:
-                self._loadAccount(result)
+            if not result:
+                return ({"error": "account not found"}, 404)
 
-            return (result or {}, 200)
-
+            self._loadAccount(result)
+            return (self._authUserPayload(result), 200)
         finally:
             db.close()
 
@@ -169,19 +214,14 @@ class User:
 
         data = data or {}
 
-        fullname = (
-            data.get("fullname")
-            or data.get("full_name")
-            or ""
-        ).strip()
-
-        email = (data.get("email") or "").strip()
-
-        if not fullname or not email:
-            return (
-                {"error": "fullname and email are required"},
-                400,
+        try:
+            fullname = _required_text(
+                data.get("fullname", data.get("full_name")),
+                "Full name",
             )
+            email = _valid_email(data.get("email"))
+        except ValueError as exc:
+            return ({"error": str(exc)}, 400)
 
         user = self.identity
         db = get_db()
@@ -245,6 +285,15 @@ class User:
 
         current = data.get("current_password", "")
         new_password = data.get("new_password", "")
+
+        if not isinstance(current, str) or not isinstance(new_password, str):
+            return (
+                {
+                    "error":
+                    "current_password and new_password must be strings"
+                },
+                400,
+            )
 
         if not current or not new_password:
             return (
