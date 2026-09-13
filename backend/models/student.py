@@ -146,17 +146,17 @@ class Student(User):
             left join registrations r on r.course_id=c.course_id and r.semester_id=%s
             where s.student_id=%s
               and (c.course_code ilike %s or c.course_name ilike %s)
-              and not exists (
+              and (not %s or not exists (
                   select 1 from registrations r2
                   where r2.student_id=s.student_id and r2.course_id=c.course_id
                     and (%s is null or r2.semester_id=%s)
                     and r2.status='REGISTERED'
-              )
-              and not exists (
+              ))
+              and (not %s or not exists (
                   select 1 from registrations r3
                   where r3.student_id=s.student_id and r3.course_code=c.course_code
                     and r3.result_status='passed'
-              )
+              ))
             group by c.course_id, c.course_code, c.course_name, c.credit, c.prerequisite_course_code,
                      pc.course_name, cu.recommended_semester, c.max_capacity, s.student_id
             order by c.course_code
@@ -167,8 +167,10 @@ class Student(User):
                     student_record["student_id"],
                     f"%{search}%",
                     f"%{search}%",
+                    period_id is not None,
                     semester_id,
                     semester_id,
+                    period_id is not None,
                 ),
             )
         finally:
