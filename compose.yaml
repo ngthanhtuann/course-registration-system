@@ -1,0 +1,26 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    env_file:
+      - backend/.env
+    environment:
+      HOST: 0.0.0.0
+      PORT: "5000"
+    ports:
+      - "127.0.0.1:5000:5000"
+    init: true
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    environment:
+      BACKEND_PROXY_TARGET: http://backend:5000
+      PORT: "8443"
+    ports:
+      - "127.0.0.1:8443:8443"
+    depends_on:
+      - backend
+    init: true

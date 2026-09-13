@@ -17,6 +17,7 @@ export default defineConfig(({ mode }) => {
     .split(',')
     .map((host) => host.trim())
     .filter(Boolean)
+  const backendProxyTarget = process.env.BACKEND_PROXY_TARGET || 'http://127.0.0.1:5000'
 
   return {
     base: process.env.FIGMA_PUBLIC_URL ? `${process.env.FIGMA_PUBLIC_URL}/` : '/',
@@ -43,10 +44,10 @@ export default defineConfig(({ mode }) => {
       strictPort: true,
       allowedHosts: configuredAllowedHosts.length > 0 ? configuredAllowedHosts : true,
       watch: { ignored: ['**/.figma/**'] },
-      proxy: { '/api': { target: 'http://127.0.0.1:5000', changeOrigin: true } },
+      proxy: { '/api': { target: backendProxyTarget, changeOrigin: true } },
     },
     preview: {
-      proxy: { '/api': { target: 'http://127.0.0.1:5000', changeOrigin: true } },
+      proxy: { '/api': { target: backendProxyTarget, changeOrigin: true } },
       host: '0.0.0.0',
       port: parseInt(process.env.PORT || '8443'),
     },
